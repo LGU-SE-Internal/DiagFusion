@@ -35,6 +35,7 @@ class FastTextLab:
         test = self.cases[self.cases["data_type"] == "test"].index
         total = self.cases.index
         self.save_to_txt(temp_data, train, self.config["train_path"])
+        print(f"===================\n")
         self.save_to_txt(temp_data, test, self.config["test_path"])
         #         self.save_to_txt(temp_data, total, self.config['total_path'])
         #         self.anomaly_type_labels = dict(zip(self.anomaly_types, range(len(self.anomaly_types))))
@@ -141,6 +142,8 @@ class FastTextLab:
                         f.write(
                             f"{text}\t__label__{self.node_labels[node_info[0]]}{self.anomaly_type_labels[node_info[1]]}\n"
                         )
+                        label_str = f"__label__{self.node_labels[node_info[0]]}{self.anomaly_type_labels[node_info[1]]}\n"
+                        print(f"当前标签: {label_str.strip()}")
                     #                         self.anomaly_types.add(f'{node_info[0]}{node_info[1]}')
                     elif isinstance(text, list):
                         text = " ".join(text)

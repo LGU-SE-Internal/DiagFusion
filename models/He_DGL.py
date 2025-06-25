@@ -22,6 +22,7 @@ from sklearn.ensemble import (
 import copy
 from sklearn.metrics import precision_score, f1_score, recall_score
 import warnings
+import json
 
 warnings.filterwarnings("ignore")
 
@@ -236,154 +237,8 @@ class RawDataProcess:
             # 异质图
             if dataset == "gaia":
                 topology = (
-                    [
-                        8,
-                        6,
-                        8,
-                        4,
-                        6,
-                        4,
-                        2,
-                        9,
-                        1,
-                        3,
-                        3,
-                        7,
-                        1,
-                        7,
-                        5,
-                        0,
-                        8,
-                        8,
-                        9,
-                        9,
-                        8,
-                        8,
-                        9,
-                        9,
-                        8,
-                        8,
-                        9,
-                        9,
-                        2,
-                        2,
-                        3,
-                        3,
-                        0,
-                        0,
-                        1,
-                        1,
-                        4,
-                        4,
-                        5,
-                        5,
-                        2,
-                        2,
-                        3,
-                        3,
-                        6,
-                        7,
-                        6,
-                        7,
-                        4,
-                        5,
-                        4,
-                        5,
-                        2,
-                        3,
-                        2,
-                        3,
-                        0,
-                        1,
-                        0,
-                        1,
-                        6,
-                        7,
-                        6,
-                        7,
-                        6,
-                        7,
-                        6,
-                        7,
-                        6,
-                        7,
-                        6,
-                        7,
-                    ],
-                    [
-                        6,
-                        8,
-                        4,
-                        8,
-                        4,
-                        6,
-                        9,
-                        2,
-                        3,
-                        1,
-                        7,
-                        3,
-                        7,
-                        1,
-                        0,
-                        5,
-                        6,
-                        7,
-                        6,
-                        7,
-                        4,
-                        5,
-                        4,
-                        5,
-                        2,
-                        3,
-                        2,
-                        3,
-                        0,
-                        1,
-                        0,
-                        1,
-                        6,
-                        7,
-                        6,
-                        7,
-                        6,
-                        7,
-                        6,
-                        7,
-                        6,
-                        7,
-                        6,
-                        7,
-                        8,
-                        8,
-                        9,
-                        9,
-                        8,
-                        8,
-                        9,
-                        9,
-                        8,
-                        8,
-                        9,
-                        9,
-                        2,
-                        2,
-                        3,
-                        3,
-                        0,
-                        0,
-                        1,
-                        1,
-                        4,
-                        4,
-                        5,
-                        5,
-                        2,
-                        2,
-                        3,
-                        3,
-                    ],
+                    [8, 6, 8, 4, 6, 4, 2, 9, 1, 3, 3, 7, 1, 7, 5, 0, 8, 8, 9, 9, 8, 8, 9, 9, 8, 8, 9, 9, 2, 2, 3, 3, 0, 0, 1, 1, 4, 4, 5, 5, 2, 2, 3, 3, 6, 7, 6, 7, 4, 5, 4, 5, 2, 3, 2, 3, 0, 1, 0, 1, 6, 7, 6, 7, 6, 7, 6, 7, 6, 7, 6, 7],
+                    [6, 8, 4, 8, 4, 6, 9, 2, 3, 1, 7, 3, 7, 1, 0, 5, 6, 7, 6, 7, 4, 5, 4, 5, 2, 3, 2, 3, 0, 1, 0, 1, 6, 7, 6, 7, 6, 7, 6, 7, 6, 7, 6, 7, 8, 8, 9, 9, 8, 8, 9, 9, 8, 8, 9, 9, 2, 2, 3, 3, 0, 0, 1, 1, 4, 4, 5, 5, 2, 2, 3, 3],
                 )
             elif dataset == "20aiops":
                 topology = (
@@ -908,6 +763,16 @@ class RawDataProcess:
                 )  # 正向
             #                 topology = ([8, 6, 8, 4, 6, 4, 2, 9, 1, 3, 3, 7, 1, 7, 5, 0, 8, 8, 9, 9, 8, 8, 9, 9, 8, 8, 9, 9, 2, 2, 3, 3, 0, 0, 1, 1, 4, 4, 5, 5, 2, 2, 3, 3, 6, 7, 6, 7, 4, 5, 4, 5, 2, 3, 2, 3, 0, 1, 0, 1, 6, 7, 6, 7, 6, 7, 6, 7, 6, 7, 6, 7],
             #                            [6, 8, 4, 8, 4, 6, 9, 2, 3, 1, 7, 3, 7, 1, 0, 5, 6, 7, 6, 7, 4, 5, 4, 5, 2, 3, 2, 3, 0, 1, 0, 1, 6, 7, 6, 7, 6, 7, 6, 7, 6, 7, 6, 7, 8, 8, 9, 9, 8, 8, 9, 9, 8, 8, 9, 9, 2, 2, 3, 3, 0, 0, 1, 1, 4, 4, 5, 5, 2, 2, 3, 3])  # 使用异质图
+            elif dataset == "rcabench":
+                # 从json文件中读取拓扑结构
+                topology_path = "/home/nn/workspace/DiagFusion/data/gaia/demo/demo2/anomalies/instance_topology.json"
+                with open(topology_path, 'r') as f:
+                    topology_data = json.load(f)
+                
+                topology = (
+                    topology_data["source_nodes"],
+                    topology_data["target_nodes"]
+                )
             elif dataset == "20aiops":
                 # topology = (
                 #     [2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 13, 13, 13, 10, 10, 11, 11, 12, 12, 10, 11, 12],
@@ -1477,6 +1342,16 @@ class UnircaLab:
             }
         elif config["dataset"] == "20aiops":
             self.topoinfo = {0: [0, 1], 1: list(range(2, 10)), 2: list(range(10, 14))}
+        elif config["dataset"] == "rcabench":
+            self.topoinfo = {
+                0: [0],
+                1: [1, 4],
+                2: [2],
+                3: [3, 5, 9],
+                4: [6],
+                5: [7],
+                6: [8],
+            }
         else:
             raise Exception("Unknow dataset")
 
@@ -2364,7 +2239,7 @@ class UnircaLab:
         #                                              os.path.join(save_dir, 'topology.pkl')))
         t2 = time.time()
         print("train ends at", t2)
-        print("train use time", t1 - s, "s ", t2 - t1, "s")
+        # print("train use time", t1 - s, "s ", t2 - t1, "s")
         # 测试并分析准确率
         s = time.time()
         print("test starts at", s)
