@@ -5,7 +5,7 @@ py2neo
 pytz==2022.2.1
 PyYAML==6.0
 scikit_learn==1.1.2
-torch==1.10.0
+torch==1.11.0
 tqdm==4.64.0
 utils==1.0.1
 dgl==0.9.1

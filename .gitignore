@@ -1,1 +1,6 @@
 *.pyc
+*.json
+*.csv
+*.npy
+temp_logs/
+data/

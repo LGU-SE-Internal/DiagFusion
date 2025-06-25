@@ -142,8 +142,8 @@ class FastTextLab:
                         f.write(
                             f"{text}\t__label__{self.node_labels[node_info[0]]}{self.anomaly_type_labels[node_info[1]]}\n"
                         )
-                        label_str = f"__label__{self.node_labels[node_info[0]]}{self.anomaly_type_labels[node_info[1]]}\n"
-                        print(f"当前标签: {label_str.strip()}")
+                        # label_str = f"__label__{self.node_labels[node_info[0]]}{self.anomaly_type_labels[node_info[1]]}\n"
+                        # print(f"当前标签: {label_str.strip()}")
                     #                         self.anomaly_types.add(f'{node_info[0]}{node_info[1]}')
                     elif isinstance(text, list):
                         text = " ".join(text)

@@ -1,0 +1,40 @@
+2025-06-17 23:23:13.755 | INFO     | trainer:__init__:48 - Initializing MultiModalTrainer
+2025-06-17 23:23:38.534 | INFO     | trainer:__init__:65 - WandB initialized successfully
+2025-06-17 23:23:39.734 | INFO     | trainer:__init__:70 - Using device: cpu
+2025-06-17 23:23:40.567 | INFO     | trainer:__init__:71 - Number of data paths: 10
+2025-06-17 23:26:23.928 | INFO     | trainer:__init__:48 - Initializing MultiModalTrainer
+2025-06-17 23:26:34.144 | INFO     | trainer:__init__:65 - WandB initialized successfully
+2025-06-17 23:26:34.144 | INFO     | trainer:__init__:70 - Using device: cpu
+2025-06-17 23:26:34.145 | INFO     | trainer:__init__:71 - Number of data paths: 300
+2025-06-17 23:28:31.621 | INFO     | trainer:__init__:48 - Initializing MultiModalTrainer
+2025-06-17 23:28:37.163 | INFO     | trainer:__init__:65 - WandB initialized successfully
+2025-06-17 23:28:37.164 | INFO     | trainer:__init__:70 - Using device: cpu
+2025-06-17 23:28:37.164 | INFO     | trainer:__init__:71 - Number of data paths: 300
+2025-06-17 23:33:43.140 | INFO     | trainer:__init__:48 - Initializing MultiModalTrainer
+2025-06-17 23:33:46.785 | INFO     | trainer:__init__:65 - WandB initialized successfully
+2025-06-17 23:33:46.786 | INFO     | trainer:__init__:70 - Using device: cpu
+2025-06-17 23:33:46.786 | INFO     | trainer:__init__:71 - Number of data paths: 10
+2025-06-17 23:37:37.100 | INFO     | trainer:__init__:48 - Initializing MultiModalTrainer
+2025-06-17 23:37:43.166 | INFO     | trainer:__init__:65 - WandB initialized successfully
+2025-06-17 23:37:43.166 | INFO     | trainer:__init__:70 - Using device: cpu
+2025-06-17 23:37:43.167 | INFO     | trainer:__init__:71 - Number of data paths: 10
+2025-06-17 23:40:16.529 | INFO     | trainer:__init__:48 - Initializing MultiModalTrainer
+2025-06-17 23:40:22.553 | INFO     | trainer:__init__:65 - WandB initialized successfully
+2025-06-17 23:40:22.554 | INFO     | trainer:__init__:70 - Using device: cpu
+2025-06-17 23:40:22.554 | INFO     | trainer:__init__:71 - Number of data paths: 10
+2025-06-17 23:43:03.263 | INFO     | trainer:__init__:48 - Initializing MultiModalTrainer
+2025-06-17 23:43:06.967 | INFO     | trainer:__init__:65 - WandB initialized successfully
+2025-06-17 23:43:06.968 | INFO     | trainer:__init__:70 - Using device: cpu
+2025-06-17 23:43:06.968 | INFO     | trainer:__init__:71 - Number of data paths: 10
+2025-06-17 23:47:58.639 | INFO     | trainer:__init__:48 - Initializing MultiModalTrainer
+2025-06-17 23:48:01.961 | INFO     | trainer:__init__:65 - WandB initialized successfully
+2025-06-17 23:48:01.962 | INFO     | trainer:__init__:70 - Using device: cpu
+2025-06-17 23:48:01.962 | INFO     | trainer:__init__:71 - Number of data paths: 10
+2025-06-18 00:37:03.890 | INFO     | trainer:__init__:48 - Initializing MultiModalTrainer
+2025-06-18 00:37:08.451 | INFO     | trainer:__init__:65 - WandB initialized successfully
+2025-06-18 00:37:08.451 | INFO     | trainer:__init__:70 - Using device: cpu
+2025-06-18 00:37:08.452 | INFO     | trainer:__init__:71 - Number of data paths: 10
+2025-06-18 00:40:05.342 | INFO     | trainer:__init__:48 - Initializing MultiModalTrainer
+2025-06-18 00:40:08.581 | INFO     | trainer:__init__:65 - WandB initialized successfully
+2025-06-18 00:40:08.581 | INFO     | trainer:__init__:70 - Using device: cpu
+2025-06-18 00:40:08.582 | INFO     | trainer:__init__:71 - Number of data paths: 10

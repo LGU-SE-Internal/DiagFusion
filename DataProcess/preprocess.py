@@ -99,7 +99,6 @@ def process_data(
         - injection_df: 注入信息DataFrame  
         - metric_dict: 指标数据字典
     """
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # 预处理日志数据
     processed_logs = preprocess_logs(data_paths, cache_dir)

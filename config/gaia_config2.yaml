@@ -1,0 +1,79 @@
+base_path: .
+dataset: rcabench
+demo_path: data/gaia/demo
+event_path: data/gaia/events
+exploration_path: exploration/gaia/pics
+fasttext:
+  da_method: w2v
+  dataset: rcabench
+  edit_count: 1
+  epoch: 5
+  fasttext_dir: fasttext
+  minCount: 1
+  nodes: ts-food-service-4s44pn ts-ui-dashboard-hslc5b ts-travel-plan-6rhp8b ts-travel-plan-cqd8bl
+    ts-seat-service-2d7nt2 ts-ui-dashboard-7mcsqg ts-security-service-pzs4sr ts-travel-plan-m5p95z
+    ts-config-service-q4hcnr ts-inside-payment-qhdwmb
+  sample_count: 1000
+  save_path: fasttext/event_embedding.pkl
+  supervised: true
+  temp_dir: fasttext/temp
+  test_path: fasttext/temp/test.txt
+  text_path: parse/stratification_texts.pkl
+  train_da_path: fasttext/temp/train_da.txt
+  train_path: fasttext/temp/train.txt
+  vector_dim: 100
+feature: feature_list[0]
+feature_list:
+  0: TFIDF_X
+  1: BOW_X
+  2: NGram_X
+  3: TFIDF_BOW_NGram_X
+  4: TFIDF_BOW_X
+  5: TFIDF_NGram_X,
+  6: BOW_NGram_X
+feature_path: data/gaia/feature
+he_dgl:
+  N_A: 27
+  N_S: 7
+  TOPK_SA: 10
+  Xs: sentence_embedding.pkl
+  aug: false
+  aug_size: 0
+  batch_size: 1000
+  data_dir: ''
+  dataset: rcabench
+  epoch: 6000
+  heterogeneous: false
+  lr: 0.001
+  nodes: ts-food-service-4s44pn ts-ui-dashboard-hslc5b ts-travel-plan-6rhp8b ts-travel-plan-cqd8bl
+    ts-seat-service-2d7nt2 ts-ui-dashboard-7mcsqg ts-security-service-pzs4sr ts-travel-plan-m5p95z
+    ts-config-service-q4hcnr ts-inside-payment-qhdwmb
+  run_table: gt.csv
+  save_dir: dgl/stratification_10
+  save_model: false
+  seed: 2
+  text_path: parse/stratification_texts.pkl
+  weight_decay: 0.0001
+  win_size: 10
+  win_threshold: 0.0001
+label: demo2
+log_path: data/gaia/demo/log
+metric_path: data/gaia/demo/metric
+parse:
+  log_path: anomalies/stratification_logs.npy
+  metric_path: anomalies/demo_metric.json
+  nodes: ts-food-service-4s44pn ts-ui-dashboard-hslc5b ts-travel-plan-6rhp8b ts-travel-plan-cqd8bl
+    ts-seat-service-2d7nt2 ts-ui-dashboard-7mcsqg ts-security-service-pzs4sr ts-travel-plan-m5p95z
+    ts-config-service-q4hcnr ts-inside-payment-qhdwmb
+  parse_dir: parse
+  save_path: parse/stratification_texts.pkl
+  trace_path: anomalies/demo_trace.json
+result_path: result/gaia/analysis
+sentence_embedding:
+  K_S: 10
+  save_path: sentence_embedding.pkl
+  source_path: fasttext/event_embedding.pkl
+  test_path: fasttext/temp/test.txt
+  train_path: fasttext/temp/train.txt
+source_data_path: data/gaia/source_data
+trace_path: data/gaia/demo/trace

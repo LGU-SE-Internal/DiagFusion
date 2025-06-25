@@ -20,8 +20,8 @@ if __name__ == "__main__":
     )
     labels = pd.read_csv(label_path, index_col=0)
 
-    # print('[parse]')
-    # metric_trace_log_parse.run_parse(deal_config(config, 'parse'), labels)
+    print('[parse]')
+    metric_trace_log_parse.run_parse(deal_config(config, 'parse'), labels)
 
     print("[fasttext]")
     fasttext_with_DA.run_fasttext(deal_config(config, "fasttext"), labels)
