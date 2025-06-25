@@ -347,6 +347,8 @@ def preprocess_logs(
             
     # 保存为npy文件
     save_path = Path("/home/nn/workspace/DiagFusion/data/gaia/demo/demo2/anomalies/stratification_logs.npy")
+    # 确保目录存在
+    save_path.parent.mkdir(parents=True, exist_ok=True)
     np.save(str(save_path), np.array(log_sequences, dtype=object))
     
     print(f"已保存日志序列，形状: {len(log_sequences)}")

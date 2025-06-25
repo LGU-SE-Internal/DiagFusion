@@ -4,14 +4,23 @@ from pathlib import Path
 
 def update_config_nodes():
     """
-    从gt.csv中读取所有instance并更新gaia_config2.yaml中的nodes字段
+    从gt.csv中读取所有instance和service，更新配置文件中的相关字段：
+    1. 更新nodes字段为所有instance
+    2. 更新N_S为service的数量
+    3. 更新K_S为instance的数量
     """
     # 读取gt.csv文件
     gt_path = Path("/home/nn/workspace/DiagFusion/data/gaia/demo/demo2/gt.csv")
     gt_df = pd.read_csv(gt_path)
     
-    # 获取所有唯一的instance
+    # 获取所有唯一的instance和service
     instances = gt_df["instance"].unique()
+    services = gt_df["service"].unique()
+    
+    # 计算数量
+    instance_count = len(instances)
+    service_count = len(services)
+    
     # 将instances转换为空格分隔的字符串
     nodes_str = " ".join(instances)
     
@@ -21,12 +30,12 @@ def update_config_nodes():
         config = yaml.safe_load(f)
     
     # 更新nodes字段
-    # 更新parse.nodes
     config['parse']['nodes'] = nodes_str
-    # 更新fasttext.nodes
     config['fasttext']['nodes'] = nodes_str
-    # 更新he_dgl.nodes
     config['he_dgl']['nodes'] = nodes_str
+    
+    # 更新N_S为service数量
+    config['he_dgl']['N_S'] = service_count
     
     # 保存更新后的配置
     with open(config_path, 'w') as f:
@@ -34,3 +43,4 @@ def update_config_nodes():
     
     print("配置文件已更新！")
     print(f"更新的nodes为: {nodes_str}")
+    print(f"更新的N_S（服务数量）为: {service_count}")

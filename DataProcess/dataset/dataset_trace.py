@@ -20,67 +20,6 @@ def preprocess_trace_data(paths: list[Path], cache_dir: str = "./cache") -> dict
     """
     processed_dict = {}
     
-    def _build_invoke_links(df):
-        df = df.copy()
-        span_to_service = dict(zip(df["span_id"], df["service_name"]))
-        df["parent_service"] = df["parent_span_id"].map(span_to_service)
-        df["invoke_link"] = (
-            df["parent_service"].fillna("ROOT") + "_" + df["service_name"]
-        )
-        df = df[df["parent_service"].notna()]
-        return df
-    
-    def _generate_topology(all_traces_df):
-        """从trace数据生成拓扑结构
-        
-        Args:
-            all_traces_df: 包含所有trace数据的DataFrame
-            
-        Returns:
-            tuple: (source_nodes, target_nodes) 分别表示边的源节点和目标节点列表
-        """
-        # 从gt.csv中读取服务列表
-        gt_path = "/home/nn/workspace/DiagFusion/data/gaia/demo/demo2/gt.csv"
-        gt_df = pd.read_csv(gt_path)
-        target_services = gt_df["service"].unique().tolist()
-        
-        # 获取所有唯一的服务名称并排序
-        all_services = sorted(list(set(
-            list(all_traces_df["service_name"].unique()) + 
-            list(all_traces_df["parent_service"].unique())
-        )))
-        
-        # 过滤出目标服务
-        filtered_services = [s for s in all_services if s in target_services]
-        
-        # 创建服务名到ID的映射
-        service_to_id = {service: idx for idx, service in enumerate(filtered_services)}
-        
-        # 收集所有的服务调用关系
-        edges = set()
-        # 过滤出只包含目标服务的调用关系
-        filtered_df = all_traces_df[
-            (all_traces_df["service_name"].isin(target_services)) & 
-            (all_traces_df["parent_service"].isin(target_services))
-        ]
-        unique_calls = filtered_df[["parent_service", "service_name"]].drop_duplicates()
-        
-        for _, row in unique_calls.iterrows():
-            if pd.notna(row["parent_service"]):  # 确保parent_service不是NA
-                source_id = service_to_id[row["parent_service"]]
-                target_id = service_to_id[row["service_name"]]
-                # 添加双向边
-                edges.add((source_id, target_id))
-                edges.add((target_id, source_id))
-        
-        # 转换为源节点和目标节点列表
-        source_nodes = []
-        target_nodes = []
-        for source, target in sorted(edges):
-            source_nodes.append(source)
-            target_nodes.append(target)
-            
-        return source_nodes, target_nodes
 
     # 用于收集所有trace数据的列表
     all_traces = []
@@ -141,7 +80,29 @@ def preprocess_trace_data(paths: list[Path], cache_dir: str = "./cache") -> dict
     # 合并所有trace数据并生成topology
     if all_traces:
         all_traces_df = pd.concat(all_traces, ignore_index=True)
-        topology = _generate_topology(all_traces_df)
+
+        # 处理 groundtruth
+        gt_path = "/home/nn/workspace/DiagFusion/data/gaia/demo/demo2/gt.csv"
+        gt_df = pd.read_csv(gt_path)
+        services = gt_df["service"].unique().tolist()
+    
+        # 服务ID到服务名称的映射
+        service_id_to_name = {
+            idx: service_name
+            for idx, service_name in enumerate(services)
+        }
+        # 服务名称到ID的映射
+        service_to_id = {
+            service_name: idx
+            for idx, service_name in enumerate(services)
+        }
+        # 创建实例到ID的映射
+        instance_to_id = {}
+        for i, instance in enumerate(gt_df['instance']):
+            instance_to_id[instance] = i
+
+        topology = _generate_topology(all_traces_df, service_to_id)
+        
         # 将topology保存到文件
         topology_path = "/home/nn/workspace/DiagFusion/data/gaia/demo/demo2/anomalies/trace_topology.json"
         with open(topology_path, 'w') as f:
@@ -151,8 +112,8 @@ def preprocess_trace_data(paths: list[Path], cache_dir: str = "./cache") -> dict
             }, f, indent=4)
         print(f"Topology已保存到: {topology_path}")
 
-
-    service_to_instance()
+        # 直接传递topology给service_to_instance函数
+        service_to_instance(topology, gt_df, service_id_to_name, instance_to_id)
 
     return processed_dict
 
@@ -170,27 +131,89 @@ def save_trace_data(data_paths, output_path="/home/nn/workspace/DiagFusion/data/
     print(f"共处理了 {len(trace_dict)} 个case")
     return trace_dict
 
+def _build_invoke_links(df):
+    df = df.copy()
+    span_to_service = dict(zip(df["span_id"], df["service_name"]))
+    df["parent_service"] = df["parent_span_id"].map(span_to_service)
+    df["invoke_link"] = (
+        df["parent_service"].fillna("ROOT") + "_" + df["service_name"]
+    )
+    df = df[df["parent_service"].notna()]
+    return df
+    
+def _generate_topology(all_traces_df, service_to_id):
+    """从trace数据生成拓扑结构
+        
+    Args:
+        all_traces_df: 包含所有trace数据的DataFrame
+        service_to_id: 服务名称到ID的映射字典
+            
+    Returns:
+        tuple: (source_nodes, target_nodes) 分别表示边的源节点和目标节点列表
+    """
+    # 从gt.csv中读取服务列表
+    gt_path = "/home/nn/workspace/DiagFusion/data/gaia/demo/demo2/gt.csv"
+    gt_df = pd.read_csv(gt_path)
+    target_services = gt_df["service"].unique().tolist()
+        
+    # 获取所有唯一的服务名称并排序
+    all_services = sorted(list(set(
+        list(all_traces_df["service_name"].unique()) + 
+        list(all_traces_df["parent_service"].unique())
+    )))
+        
+    # 过滤出目标服务
+    filtered_services = [s for s in all_services if s in target_services]
+        
+    # 收集所有的服务调用关系
+    edges = set()
+    # 过滤出只包含目标服务的调用关系
+    filtered_df = all_traces_df[
+        (all_traces_df["service_name"].isin(target_services)) & 
+        (all_traces_df["parent_service"].isin(target_services))
+    ]
+    unique_calls = filtered_df[["parent_service", "service_name"]].drop_duplicates()
+        
+    for _, row in unique_calls.iterrows():
+        if pd.notna(row["parent_service"]):  # 确保parent_service不是NA
+            source_id = service_to_id[row["parent_service"]]
+            target_id = service_to_id[row["service_name"]]
+            # 添加双向边
+            edges.add((source_id, target_id))
+            edges.add((target_id, source_id))
+        
+    # 转换为源节点和目标节点列表
+    source_nodes = []
+    target_nodes = []
+    for source, target in sorted(edges):
+        source_nodes.append(source)
+        target_nodes.append(target)
+    
+    # 检查是否缺少节点
+    num_services = len(service_to_id)
+    existing_nodes = set(source_nodes)
+    for i in range(num_services):
+        if i not in existing_nodes:
+            # 如果缺少节点i，添加一条从i到i的边
+            source_nodes.append(i)
+            target_nodes.append(i)
+            
+    return source_nodes, target_nodes
 
-def service_to_instance():
+
+
+
+
+def service_to_instance(topology=None, gt_df=None, service_id_to_name=None, instance_to_id=None):
     """将服务级别的拓扑转换为实例级别的拓扑
 
     Args:
-        service_name: 服务名称
+        topology: tuple, 包含source_nodes和target_nodes的元组
 
     Returns:
         source_nodes: 源节点ID列表
         target_nodes: 目标节点ID列表
     """
-    # 从gt.csv中读取服务列表并创建映射
-    gt_path = "/home/nn/workspace/DiagFusion/data/gaia/demo/demo2/gt.csv"
-    gt_df = pd.read_csv(gt_path)
-    services = sorted(gt_df["service"].unique().tolist())
-    
-    # 服务ID到服务名称的映射
-    service_id_to_name = {
-        idx: service_name
-        for idx, service_name in enumerate(services)
-    }
 
     # 构建service_to_instances映射
     service_to_instances = {}
@@ -198,22 +221,35 @@ def service_to_instance():
         instances = gt_df[gt_df["service"] == service]["instance"].tolist()
         service_to_instances[service] = instances
 
-    # 创建实例到ID的映射
-    instance_to_id = {}
-    for i, instance in enumerate(gt_df['instance']):
-        instance_to_id[instance] = i
+    # 创建服务ID到实例ID的映射
+    service_instance_map = {}
+    for service_id, service_name in service_id_to_name.items():
+        instance_ids = [instance_to_id[inst] for inst in service_to_instances[service_name]]
+        service_instance_map[service_id] = instance_ids
 
-    # 读取服务级别的拓扑
-    topology_path = "/home/nn/workspace/DiagFusion/data/gaia/demo/demo2/anomalies/trace_topology.json"
-    with open(topology_path, 'r') as f:
-        service_topology = json.load(f)
+    # 保存映射关系
+    mapping_path = "/home/nn/workspace/DiagFusion/data/gaia/demo/demo2/anomalies/service_instance_mapping.json"
+    with open(mapping_path, 'w') as f:
+        json.dump({
+            "service_id_to_name": service_id_to_name,
+            "service_instance_map": service_instance_map,
+            "instance_to_id": instance_to_id
+        }, f, indent=4)
+    print(f"服务ID与实例ID的映射已保存到: {mapping_path}")
+
+    if topology is None:
+        # 如果没有传入topology，则从文件读取
+        topology_path = "/home/nn/workspace/DiagFusion/data/gaia/demo/demo2/anomalies/trace_topology.json"
+        with open(topology_path, 'r') as f:
+            topology_data = json.load(f)
+            topology = (topology_data["source_nodes"], topology_data["target_nodes"])
 
     # 生成实例级别的拓扑
     source_nodes = []
     target_nodes = []
 
     # 遍历服务级别的每条边
-    for src, tgt in zip(service_topology["source_nodes"], service_topology["target_nodes"]):
+    for src, tgt in zip(topology[0], topology[1]):
         src_service = service_id_to_name[src]
         tgt_service = service_id_to_name[tgt]
 
