@@ -9,11 +9,9 @@ def read_text(path):
     text = []
     f = open(path, "r")
     line = f.readline()
-    #     text.append(line[:-12])
     text.append(line.split("\t")[0])
     while line:
         line = f.readline()
-        #         text.append(line[:-12])
         text.append(line.split("\t")[0])
     f.close()
     # 去最后的空串
@@ -40,13 +38,9 @@ def sentence_embedding(file_dict, train_path, test_path, save_path, service_num)
         tfidf_train.toarray()
     )  # 将tf-idf矩阵抽取出来，元素a[i][j]表示j词在i类文本中的tf-idf权重
     weight_test = tfidf_test.toarray()
-    #     weight_test = tfidf_test.toarray()[-len(test_text): ]
 
     word = vectorizer.get_feature_names()  # 获取词袋模型中的所有词语
     word_dict = {word[i]: i for i in range(len(word))}
-
-    #     print('dict(vectorizer words) - dict(fasttext words) = ', set(word_dict.keys()-set(data_dict.keys())))
-    #     assert len(word_dict) + 1 == len(data_dict)
     print("len vectorizer words:", len(word_dict))
     print("len fasttext words:", len(data_dict))
     print(
@@ -90,9 +84,6 @@ def tfidf_word_embedding(weight, data_dict, texts, word_dict, service_num):
                     temp = temp + weight[count][word_dict[word]] * np.array(
                         data_dict[word]
                     )
-        #                     temp = temp + np.array(data_dict[word])
-        # 否则按零向量处理
-        #             temp /= len(words)
         case_embedding.append(temp)
         if (count + 1) % service_num == 0:  # @
             sentence_embedding.append(case_embedding)

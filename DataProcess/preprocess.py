@@ -1,9 +1,7 @@
 import json
 import os
 import pandas as pd
-import torch
 from typing import Optional
-import numpy as np
 from process_metric import process_parquet_files
 from dataset.dataset_log import derive_filename, preprocess_logs
 from dataset.dataset_trace import save_trace_data
@@ -15,7 +13,7 @@ from DataProcess.config import update_config_nodes
 
 def preprocess_injection(
         data_paths: list[Path],
-        output_path: str = "/home/nn/workspace/DiagFusion/data/gaia/demo/demo2/gt.csv",
+        output_path: str = "../data/gaia/demo/demo2/gt.csv",
     ) -> pd.DataFrame:
         """从injection文件中提取信息生成ground truth数据
 
@@ -26,6 +24,10 @@ def preprocess_injection(
         Returns:
             包含ground truth信息的DataFrame
         """
+        # 确保输出目录存在
+        output_path = Path(output_path)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        
         records = []
         for idx, data_pack in enumerate(data_paths):
             # 获取相关文件路径

@@ -10,9 +10,9 @@ fasttext:
   epoch: 5
   fasttext_dir: fasttext
   minCount: 1
-  nodes: ts-food-service-4s44pn ts-ui-dashboard-hslc5b ts-travel-plan-6rhp8b ts-travel-plan-cqd8bl
-    ts-seat-service-2d7nt2 ts-ui-dashboard-7mcsqg ts-security-service-pzs4sr ts-travel-plan-m5p95z
-    ts-config-service-q4hcnr ts-inside-payment-qhdwmb
+  nodes: ts-basic-service-x8dxb8 ts-basic-service-ndb7w5 ts-inside-payment-8r7bxl
+    ts-inside-payment-qhdwmb ts-inside-payment-lr88cd ts-order-other-tbln4n ts-order-other-q68g97
+    ts-order-service-bddfbg ts-preserve-service-mzjl25 ts-route-plan-f25v4c
   sample_count: 1000
   save_path: fasttext/event_embedding.pkl
   supervised: true
@@ -34,7 +34,7 @@ feature_list:
 feature_path: data/gaia/feature
 he_dgl:
   N_A: 27
-  N_S: 7
+  N_S: 6
   TOPK_SA: 10
   Xs: sentence_embedding.pkl
   aug: false
@@ -45,9 +45,9 @@ he_dgl:
   epoch: 6000
   heterogeneous: false
   lr: 0.001
-  nodes: ts-food-service-4s44pn ts-ui-dashboard-hslc5b ts-travel-plan-6rhp8b ts-travel-plan-cqd8bl
-    ts-seat-service-2d7nt2 ts-ui-dashboard-7mcsqg ts-security-service-pzs4sr ts-travel-plan-m5p95z
-    ts-config-service-q4hcnr ts-inside-payment-qhdwmb
+  nodes: ts-basic-service-x8dxb8 ts-basic-service-ndb7w5 ts-inside-payment-8r7bxl
+    ts-inside-payment-qhdwmb ts-inside-payment-lr88cd ts-order-other-tbln4n ts-order-other-q68g97
+    ts-order-service-bddfbg ts-preserve-service-mzjl25 ts-route-plan-f25v4c
   run_table: gt.csv
   save_dir: dgl/stratification_10
   save_model: false
@@ -62,9 +62,9 @@ metric_path: data/gaia/demo/metric
 parse:
   log_path: anomalies/stratification_logs.npy
   metric_path: anomalies/demo_metric.json
-  nodes: ts-food-service-4s44pn ts-ui-dashboard-hslc5b ts-travel-plan-6rhp8b ts-travel-plan-cqd8bl
-    ts-seat-service-2d7nt2 ts-ui-dashboard-7mcsqg ts-security-service-pzs4sr ts-travel-plan-m5p95z
-    ts-config-service-q4hcnr ts-inside-payment-qhdwmb
+  nodes: ts-basic-service-x8dxb8 ts-basic-service-ndb7w5 ts-inside-payment-8r7bxl
+    ts-inside-payment-qhdwmb ts-inside-payment-lr88cd ts-order-other-tbln4n ts-order-other-q68g97
+    ts-order-service-bddfbg ts-preserve-service-mzjl25 ts-route-plan-f25v4c
   parse_dir: parse
   save_path: parse/stratification_texts.pkl
   trace_path: anomalies/demo_trace.json

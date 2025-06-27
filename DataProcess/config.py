@@ -10,7 +10,9 @@ def update_config_nodes():
     3. 更新K_S为instance的数量
     """
     # 读取gt.csv文件
-    gt_path = Path("/home/nn/workspace/DiagFusion/data/gaia/demo/demo2/gt.csv")
+    gt_path = Path("../data/gaia/demo/demo2/gt.csv")
+    # 确保gt.csv所在目录存在
+    gt_path.parent.mkdir(parents=True, exist_ok=True)
     gt_df = pd.read_csv(gt_path)
     
     # 获取所有唯一的instance和service
@@ -25,7 +27,9 @@ def update_config_nodes():
     nodes_str = " ".join(instances)
     
     # 读取yaml配置文件
-    config_path = Path("/home/nn/workspace/DiagFusion/config/gaia_config2.yaml")
+    config_path = Path("../config/gaia_config2.yaml")
+    # 确保配置文件所在目录存在
+    config_path.parent.mkdir(parents=True, exist_ok=True)
     with open(config_path, 'r') as f:
         config = yaml.safe_load(f)
     
@@ -36,6 +40,7 @@ def update_config_nodes():
     
     # 更新N_S为service数量
     config['he_dgl']['N_S'] = service_count
+    config['sentence_embedding']['K_S'] = instance_count
     
     # 保存更新后的配置
     with open(config_path, 'w') as f:
@@ -44,3 +49,4 @@ def update_config_nodes():
     print("配置文件已更新！")
     print(f"更新的nodes为: {nodes_str}")
     print(f"更新的N_S（服务数量）为: {service_count}")
+    print(f"更新的K_S（instance数量）为: {instance_count}")

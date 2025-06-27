@@ -73,7 +73,10 @@ def process_parquet_files(data_paths: list[Path]):
             print(f"处理 {data_pack.name} 时出错: {str(e)}")
             continue
     
-    output_file = os.path.join('/home/nn/workspace/DiagFusion/data/gaia/demo/demo2/anomalies', 'demo_metric.json')
+    # 设置输出路径并确保目录存在
+    output_file = Path('../data/gaia/demo/demo2/anomalies/demo_metric.json')
+    output_file.parent.mkdir(parents=True, exist_ok=True)
+    
     with open(output_file, 'w') as f:
         json.dump(case_dict, f, indent=4)
     

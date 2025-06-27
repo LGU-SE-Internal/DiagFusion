@@ -8,17 +8,11 @@ from torch import tensor
 from torch.utils.data import DataLoader
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 import dgl
 import dgl.data.utils as U
 import time
 import pickle
 from models.layers import *
-from sklearn.ensemble import (
-    RandomForestClassifier,
-    AdaBoostClassifier,
-    GradientBoostingClassifier,
-)
 import copy
 from sklearn.metrics import precision_score, f1_score, recall_score
 import warnings
@@ -244,104 +238,7 @@ class RawDataProcess:
                 raise Exception()
         else:
             # 同质图
-            if dataset == "gaia":
-                topology = (
-                    [
-                        8,
-                        6,
-                        8,
-                        4,
-                        9,
-                        2,
-                        0,
-                        5,
-                        3,
-                        1,
-                        3,
-                        7,
-                        1,
-                        7,
-                        6,
-                        4,
-                        8,
-                        8,
-                        9,
-                        9,
-                        8,
-                        8,
-                        9,
-                        9,
-                        8,
-                        8,
-                        9,
-                        9,
-                        2,
-                        2,
-                        3,
-                        3,
-                        0,
-                        0,
-                        1,
-                        1,
-                        4,
-                        4,
-                        5,
-                        5,
-                        2,
-                        2,
-                        3,
-                        3,
-                    ],
-                    [
-                        6,
-                        8,
-                        4,
-                        8,
-                        2,
-                        9,
-                        5,
-                        0,
-                        1,
-                        3,
-                        7,
-                        3,
-                        7,
-                        1,
-                        4,
-                        6,
-                        6,
-                        7,
-                        6,
-                        7,
-                        4,
-                        5,
-                        4,
-                        5,
-                        2,
-                        3,
-                        2,
-                        3,
-                        0,
-                        1,
-                        0,
-                        1,
-                        6,
-                        7,
-                        6,
-                        7,
-                        6,
-                        7,
-                        6,
-                        7,
-                        6,
-                        7,
-                        6,
-                        7,
-                    ],
-                )  # 正向
-            #                 topology = ([8, 6, 8, 4, 6, 4, 2, 9, 1, 3, 3, 7, 1, 7, 5, 0, 8, 8, 9, 9, 8, 8, 9, 9, 8, 8, 9, 9, 2, 2, 3, 3, 0, 0, 1, 1, 4, 4, 5, 5, 2, 2, 3, 3, 6, 7, 6, 7, 4, 5, 4, 5, 2, 3, 2, 3, 0, 1, 0, 1, 6, 7, 6, 7, 6, 7, 6, 7, 6, 7, 6, 7],
-            #                            [6, 8, 4, 8, 4, 6, 9, 2, 3, 1, 7, 3, 7, 1, 0, 5, 6, 7, 6, 7, 4, 5, 4, 5, 2, 3, 2, 3, 0, 1, 0, 1, 6, 7, 6, 7, 6, 7, 6, 7, 6, 7, 6, 7, 8, 8, 9, 9, 8, 8, 9, 9, 8, 8, 9, 9, 2, 2, 3, 3, 0, 0, 1, 1, 4, 4, 5, 5, 2, 2, 3, 3])  # 使用异质图
-            elif dataset == "rcabench":
+            if dataset == "rcabench":
                 # 从json文件中读取拓扑结构
                 topology_path = "/home/nn/workspace/DiagFusion/data/gaia/demo/demo2/anomalies/instance_topology.json"
                 with open(topology_path, 'r') as f:
@@ -451,21 +348,7 @@ class UnircaLab:
         self.demos = pd.read_csv(
             os.path.join(self.config["data_dir"], self.config["run_table"]), index_col=0
         )
-        if config["dataset"] == "gaia":
-            self.topoinfo = {0: [0, 1], 1: [2, 3], 2: [4, 5], 3: [6, 7], 4: [8, 9]}
-        elif config["dataset"] == "21aiops":
-            self.topoinfo = {
-                0: [0, 1],
-                1: [2, 3],
-                2: [4, 5],
-                3: [6, 7],
-                4: [8, 9, 10, 11],
-                5: [12, 13],
-                6: [],
-            }
-        elif config["dataset"] == "20aiops":
-            self.topoinfo = {0: [0, 1], 1: list(range(2, 10)), 2: list(range(10, 14))}
-        elif config["dataset"] == "rcabench":
+        if config["dataset"] == "rcabench":
             # 从service_instance_mapping.json读取拓扑信息
             mapping_path = "/home/nn/workspace/DiagFusion/data/gaia/demo/demo2/anomalies/service_instance_mapping.json"
             with open(mapping_path, 'r') as f:
@@ -486,21 +369,14 @@ class UnircaLab:
         df.to_csv(save_path, index=False)
 
     def train(self, dataset, key):
-        # def hook(module, input, output):
-        #     features.append(output)
-        #     return None
         if self.config["seed"] is not None:
             torch.manual_seed(self.config["seed"])
-        #         print('len train_dataset=', len(dataset))
         dataloader = DataLoader(
             dataset, batch_size=self.config["batch_size"], collate_fn=self.collate
         )
-        #         device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
         device = "cpu"
-        # print(device)
 
         in_dim = dataset.graphs[0].ndata["attr"].shape[1]
-        #         out_dim = len(set([i.item() for i in dataset.labels]))
         out_dim = self.config[key]
         # hid_dim = (in_dim + out_dim) * 2 // 3
         hid_dim = int(np.sqrt(in_dim * out_dim))
@@ -508,20 +384,8 @@ class UnircaLab:
             etype = U.load_info(os.path.join(self.config["save_dir"], "edge_types.pkl"))
             model = RGCNClassifier(in_dim, hid_dim, out_dim, etype).to(
                 device
-            )  # @ 异质图
-        #             model = RGCNv2Classifier(in_dim, hid_dim, out_dim, etype).to(device)
-        # 钩子函数钩取中间结果
-        #             for (name, module) in model.named_modules():
-        #                 print("name: ", name)
-        #             model.conv2.dropout.register_forward_hook(hook)
+            )
         else:
-            #             model = GCNClassifier(in_dim, hid_dim, out_dim).to(device)  # 同质图
-            #             model = GATClassifier(in_dim, hid_dim, out_dim, 3).to(device) # GAT
-            #             model = SAGEClassifier(in_dim, hid_dim, out_dim).to(device) # GraphSAGE
-            #             model = TAGClassifier(in_dim, hid_dim, out_dim) # TAGConv
-            #             model = GATv2Classifier(in_dim, hid_dim, out_dim, 3).to(device)
-            #             model = LinearClassifier(in_dim, hid_dim, out_dim).to(device)
-            #             model = ChebClassifier(in_dim, hid_dim, out_dim, 2, True).to(device) # ChebConv
             model = TAGClassifier(in_dim, hid_dim, out_dim).to(device)
         print(model)
 
@@ -553,14 +417,7 @@ class UnircaLab:
                 and abs(losses[-self.config["win_size"]] - losses[-1])
                 < self.config["win_threshold"]
             ):
-                # 保存钩子函数的中间结果
-                #                 with open('feature_out.pkl', 'wb') as f:
-                #                     pickle.dump(features, f)
                 break
-
-        # loss曲线
-        #         plt.plot(range(len(losses)), losses)
-        #         plt.show()
         return model
 
     def multi_trainv2(self, dataset_ts, dataset_ta, dataset_t3):
@@ -961,11 +818,8 @@ class UnircaLab:
             test_embeds = model.get_embeds(
                 batched_graph, batched_graph.ndata["attr"].float(), True
             )
-            #             score = classifier.score(test_embeds.detach().numpy(), labels.detach().numpy())
-            #             print('score: ', score)
             output = classifier.predict_proba(test_embeds.detach().numpy())
             labels = labels.detach().numpy().reshape(-1, 1)
-            # print(classifier.score(test_embeds.detach().numpy(), labels))
             preds = [
                 [
                     item[-1]
@@ -1027,27 +881,6 @@ class UnircaLab:
                 accs, ins_res = self.test_instance_local(ser_res, max_num=2)
                 ins_res.to_csv(f"{out_dir}/multitask_seed{seed}_{out_file}")
                 columns = ["A@1", "A@2", "A@3", "A@4", "A@5"]
-            elif task == "anomaly_type":
-                _, indices = torch.topk(output, k=k, dim=1, largest=True, sorted=True)
-                out_dir = os.path.join(self.config["save_dir"], "preds")
-                if not os.path.exists(out_dir):
-                    os.makedirs(out_dir)
-                y_pred = indices.detach().numpy()
-                y_true = labels.detach().numpy().reshape(-1, 1)
-                pre = precision_score(y_pred[:, 0], y_true, average="weighted")
-                rec = recall_score(y_pred[:, 0], y_true, average="weighted")
-                f1 = f1_score(y_pred[:, 0], y_true, average="weighted")
-                print("Weighted precision", pre)
-                print("Weighted recall", rec)
-                print("Weighted f1-score", f1)
-                test_cases = self.demos[self.demos["data_type"] == "test"]
-                pd.DataFrame(
-                    np.append(y_pred[:, 0].reshape(-1, 1), y_true, axis=1),
-                    columns=["Pred", "GroundTruth"],
-                    index=test_cases.index,
-                ).to_csv(f"{out_dir}/multitask_seed{seed}_{out_file}")
-                columns = ["Precision", "Recall", "F1-Score"]
-                accs = np.array([pre, rec, f1])
             else:
                 raise Exception("Unknow task")
 
@@ -1067,7 +900,6 @@ class UnircaLab:
         dataloader = DataLoader(
             dataset, batch_size=len(dataset) + 10, collate_fn=self.collate
         )
-        #         device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
         device = "cpu"
         seed = self.config["seed"]
         accuracy = []
@@ -1316,22 +1148,7 @@ class UnircaLab:
                 shuffle=True,
             ),
         )
-
         
-        t2 = time.time()
-        print("train ends at", t2)
-        # print("train use time", t1 - s, "s ", t2 - t1, "s")
-        # 测试并分析准确率
-        s = time.time()
-        print("test starts at", s)
-        
-        print("[Multi_task learning v0]")
-        #         t_output, t_labels = self.test(trans_model,
-        #                                        UnircaDataset(os.path.join(save_dir, 'test_Xs.pkl'),
-        #                                                      os.path.join(save_dir, 'test_ys_service.pkl'),
-        #                                                      os.path.join(save_dir, 'topology.pkl')),
-        #                                        'service_pred_trans.csv',
-        #                                        'service_acc_trans.csv')
         print("instance")
         _, _ = self.testv2(
             model_ts,
@@ -1344,23 +1161,6 @@ class UnircaLab:
             "instance_pred_multi_v0.csv",
             "instance_acc_multi_v0.csv",
         )
-        print("anomaly type")
-        _, _ = self.testv2(
-            model_ta,
-            UnircaDataset(
-                os.path.join(save_dir, "test_Xs.pkl"),
-                os.path.join(save_dir, "test_ys_anomaly_type.pkl"),
-                os.path.join(save_dir, "topology.pkl"),
-            ),
-            "anomaly_type",
-            "anomaly_pred_multi_v0.csv",
-            "anomaly_acc_multi_v0.csv",
-        )
-
-
-        t = time.time()
-        print("test ends at", t)
-        print("test use time", t - s, "s")
         # 保存模型
         if self.config["save_model"]:
             torch.save(model_ts, os.path.join(save_dir, "service_model.pt"))

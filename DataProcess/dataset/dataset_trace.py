@@ -20,6 +20,8 @@ def preprocess_trace_data(paths: list[Path], cache_dir: str = "./cache") -> dict
     """
     processed_dict = {}
     
+    # 确保缓存目录存在
+    Path(cache_dir).mkdir(parents=True, exist_ok=True)
 
     # 用于收集所有trace数据的列表
     all_traces = []
@@ -82,7 +84,7 @@ def preprocess_trace_data(paths: list[Path], cache_dir: str = "./cache") -> dict
         all_traces_df = pd.concat(all_traces, ignore_index=True)
 
         # 处理 groundtruth
-        gt_path = "/home/nn/workspace/DiagFusion/data/gaia/demo/demo2/gt.csv"
+        gt_path = "../data/gaia/demo/demo2/gt.csv"
         gt_df = pd.read_csv(gt_path)
         services = gt_df["service"].unique().tolist()
     
@@ -104,7 +106,9 @@ def preprocess_trace_data(paths: list[Path], cache_dir: str = "./cache") -> dict
         topology = _generate_topology(all_traces_df, service_to_id)
         
         # 将topology保存到文件
-        topology_path = "/home/nn/workspace/DiagFusion/data/gaia/demo/demo2/anomalies/trace_topology.json"
+        topology_path = Path("../data/gaia/demo/demo2/anomalies/trace_topology.json")
+        # 确保目录存在
+        topology_path.parent.mkdir(parents=True, exist_ok=True)
         with open(topology_path, 'w') as f:
             json.dump({
                 "source_nodes": topology[0],
@@ -118,8 +122,12 @@ def preprocess_trace_data(paths: list[Path], cache_dir: str = "./cache") -> dict
     return processed_dict
 
 # 使用示例
-def save_trace_data(data_paths, output_path="/home/nn/workspace/DiagFusion/data/gaia/demo/demo2/anomalies/demo_trace.json"):
+def save_trace_data(data_paths, output_path="../data/gaia/demo/demo2/anomalies/demo_trace.json"):
     """处理并保存trace数据为JSON文件"""
+    # 确保输出目录存在
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    
     # 预处理数据
     trace_dict = preprocess_trace_data(data_paths, cache_dir="./cache")
     
@@ -152,7 +160,7 @@ def _generate_topology(all_traces_df, service_to_id):
         tuple: (source_nodes, target_nodes) 分别表示边的源节点和目标节点列表
     """
     # 从gt.csv中读取服务列表
-    gt_path = "/home/nn/workspace/DiagFusion/data/gaia/demo/demo2/gt.csv"
+    gt_path = "../data/gaia/demo/demo2/gt.csv"
     gt_df = pd.read_csv(gt_path)
     target_services = gt_df["service"].unique().tolist()
         
@@ -228,7 +236,9 @@ def service_to_instance(topology=None, gt_df=None, service_id_to_name=None, inst
         service_instance_map[service_id] = instance_ids
 
     # 保存映射关系
-    mapping_path = "/home/nn/workspace/DiagFusion/data/gaia/demo/demo2/anomalies/service_instance_mapping.json"
+    mapping_path = Path("../data/gaia/demo/demo2/anomalies/service_instance_mapping.json")
+    # 确保目录存在
+    mapping_path.parent.mkdir(parents=True, exist_ok=True)
     with open(mapping_path, 'w') as f:
         json.dump({
             "service_id_to_name": service_id_to_name,
@@ -239,7 +249,7 @@ def service_to_instance(topology=None, gt_df=None, service_id_to_name=None, inst
 
     if topology is None:
         # 如果没有传入topology，则从文件读取
-        topology_path = "/home/nn/workspace/DiagFusion/data/gaia/demo/demo2/anomalies/trace_topology.json"
+        topology_path = "../data/gaia/demo/demo2/anomalies/trace_topology.json"
         with open(topology_path, 'r') as f:
             topology_data = json.load(f)
             topology = (topology_data["source_nodes"], topology_data["target_nodes"])
@@ -264,7 +274,9 @@ def service_to_instance(topology=None, gt_df=None, service_id_to_name=None, inst
                 target_nodes.append(instance_to_id[tgt_instance])
 
     # 保存实例级别的拓扑
-    instance_topology_path = "/home/nn/workspace/DiagFusion/data/gaia/demo/demo2/anomalies/instance_topology.json"
+    instance_topology_path = Path("../data/gaia/demo/demo2/anomalies/instance_topology.json")
+    # 确保目录存在
+    instance_topology_path.parent.mkdir(parents=True, exist_ok=True)
     with open(instance_topology_path, 'w') as f:
         json.dump({
             "source_nodes": source_nodes,

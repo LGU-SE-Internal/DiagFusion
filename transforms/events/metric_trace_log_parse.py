@@ -1,7 +1,6 @@
 import json
 import math
 import public_function as pf
-import pandas as pd
 import numpy as np
 from tqdm import tqdm
 
@@ -23,14 +22,10 @@ def metric_trace_log_parse(trace, metric, logs, labels, save_path, nodes):
                 log[k] = logs[count]
                 count += 1
 
-    # service_name = sorted(list(set(labels['service'])))
-    #     service_name = np.load('/home/u2120210568/jupyterfiles/zhangbicheng/unirca/data/21aiops/nodes.pkl', allow_pickle=True) # 仅针对21数据集
     service_name = nodes.split()
     anomaly_service = list(labels["instance"])
-    # anomaly_type = list(labels["anomaly_type"])
     anomaly_type = [str(x) for x in list(labels["anomaly_type"])]
 
-    #     demo_metric = {x: {} for x in metric.keys()}
     demo_metric = {x: {} for x in labels.index}
     k = 0
     for case_id, v in tqdm(demo_metric.items()):

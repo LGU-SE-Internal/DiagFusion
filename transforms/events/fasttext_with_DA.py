@@ -1,10 +1,7 @@
 import random
 import fasttext
 import numpy as np
-import pandas as pd
 import public_function as pf
-from collections import Counter
-import hashlib
 import time
 
 
@@ -28,22 +25,14 @@ class FastTextLab:
     def prepare_data(self):
         metric_trace_text_path = self.config["text_path"]
         temp_data = pf.load(metric_trace_text_path)
-        #         train = self.cases.index[: self.train_size]
-        #         test = self.cases.index[self.train_size: ]
-        #         total = self.cases.index
         train = self.cases[self.cases["data_type"] == "train"].index
         test = self.cases[self.cases["data_type"] == "test"].index
         total = self.cases.index
         self.save_to_txt(temp_data, train, self.config["train_path"])
         print(f"===================\n")
         self.save_to_txt(temp_data, test, self.config["test_path"])
-        #         self.save_to_txt(temp_data, total, self.config['total_path'])
-        #         self.anomaly_type_labels = dict(zip(self.anomaly_types, range(len(self.anomaly_types))))
         with open(self.config["train_path"], "r") as f:
             data = f.read().splitlines()
-        #         with open(self.config['data_path'], 'w') as f:
-        #             for text in data:
-        #                 f.write(text.split('\t')[0]+'\n')
 
         with open(self.config["train_path"], "r") as f:
             train_data = f.read().splitlines()
@@ -142,9 +131,6 @@ class FastTextLab:
                         f.write(
                             f"{text}\t__label__{self.node_labels[node_info[0]]}{self.anomaly_type_labels[node_info[1]]}\n"
                         )
-                        # label_str = f"__label__{self.node_labels[node_info[0]]}{self.anomaly_type_labels[node_info[1]]}\n"
-                        # print(f"当前标签: {label_str.strip()}")
-                    #                         self.anomaly_types.add(f'{node_info[0]}{node_info[1]}')
                     elif isinstance(text, list):
                         text = " ".join(text)
                         if fillna and len(text) == 0:
@@ -152,7 +138,6 @@ class FastTextLab:
                         f.write(
                             f"{text}\t__label__{self.node_labels[node_info[0]]}{self.anomaly_type_labels[node_info[1]]}\n"
                         )
-                    #                         self.anomaly_types.add(f'{node_info[0]}{node_info[1]}')
                     else:
                         raise Exception("type error")
         return
