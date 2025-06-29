@@ -154,11 +154,9 @@ class RawDataProcess:
         输出：
             训练集：
                 train_Xs.pkl
-                train_ys_anomaly_type.pkl
                 train_ys_service.pkl
             测试集：
                 test_Xs.pkl
-                test_ys_anomaly_type.pkl
                 test_ys_service.pkl
             拓扑：
                 topology.pkl
@@ -168,29 +166,25 @@ class RawDataProcess:
         )
         Xs = U.load_info(os.path.join(self.config["data_dir"], self.config["Xs"]))
         Xs = np.array(Xs)
-        label_types = ["anomaly_type", "service"]
-        label_dict = {label_type: None for label_type in label_types}
-        for label_type in label_types:
-            label_dict[label_type] = self.get_label(label_type, run_table)
+        
+        # 只处理service标签
+        service_labels = self.get_label("service", run_table)
 
         save_dir = self.config["save_dir"]
-        #         train_size = self.config['train_size']
         train_index = np.where(run_table["data_type"].values == "train")
         test_index = np.where(run_table["data_type"].values == "test")
         train_size = len(train_index[0])
         # 保存特征向量，特征向量是先训练集后测试集
-        #         print(train_index)
         U.save_info(os.path.join(save_dir, "train_Xs.pkl"), Xs[:train_size])
         U.save_info(os.path.join(save_dir, "test_Xs.pkl"), Xs[train_size:])
         # 保存标签
-        for label_type, labels in label_dict.items():
-            U.save_info(
-                os.path.join(save_dir, f"train_ys_{label_type}.pkl"),
-                labels[train_index],
-            )
-            U.save_info(
-                os.path.join(save_dir, f"test_ys_{label_type}.pkl"), labels[test_index]
-            )
+        U.save_info(
+            os.path.join(save_dir, f"train_ys_service.pkl"),
+            service_labels[train_index],
+        )
+        U.save_info(
+            os.path.join(save_dir, f"test_ys_service.pkl"), service_labels[test_index]
+        )
         # 保存拓扑
         topology = self.get_topology()
         U.save_info(os.path.join(save_dir, "topology.pkl"), topology)
@@ -417,95 +411,6 @@ class UnircaLab:
                 break
         return model
 
-    def multi_trainv0(self, dataset_ts, dataset_ta):
-        if self.config["seed"] is not None:
-            torch.manual_seed(self.config["seed"])
-        weight = 0.5
-        device = "cpu"
-        dataloader_ts = DataLoader(
-            dataset_ts, batch_size=self.config["batch_size"], collate_fn=self.collate
-        )
-        dataloader_ta = DataLoader(
-            dataset_ta, batch_size=self.config["batch_size"], collate_fn=self.collate
-        )
-        in_dim_ts = dataset_ts.graphs[0].ndata["attr"].shape[1]
-        out_dim_ts = self.config["N_S"]
-        hid_dim_ts = (in_dim_ts + out_dim_ts) * 2 // 3
-        in_dim_ta = dataset_ta.graphs[0].ndata["attr"].shape[1]
-        out_dim_ta = self.config["N_A"]
-        hid_dim_ta = (in_dim_ta + out_dim_ta) * 2 // 3
-        if self.config["heterogeneous"]:
-            etype = U.load_info(os.path.join(self.config["save_dir"], "edge_types.pkl"))
-            model_ts = RGCNClassifier(in_dim_ts, hid_dim_ts, out_dim_ts, etype).to(
-                device
-            )
-            model_ta = RGCNClassifier(in_dim_ta, hid_dim_ta, out_dim_ta, etype).to(
-                device
-            )
-        else:
-            model_ts = TAGClassifier(in_dim_ts, hid_dim_ts, out_dim_ts).to(device)
-            model_ta = TAGClassifier(in_dim_ta, hid_dim_ta, out_dim_ta).to(device)
-            
-        print(model_ts)
-        print(model_ta)
-
-        opt_ts = torch.optim.Adam(
-            model_ts.parameters(),
-            lr=self.config["lr"],
-            weight_decay=self.config["weight_decay"],
-        )
-        opt_ta = torch.optim.Adam(
-            model_ta.parameters(),
-            lr=self.config["lr"],
-            weight_decay=self.config["weight_decay"],
-        )
-        losses = []
-        model_ts.train()
-        model_ta.train()
-
-        ts_samples = [
-            (batched_graphs, labels) for batched_graphs, labels in dataloader_ts
-        ]
-        ta_samples = [
-            (batched_graphs, labels) for batched_graphs, labels in dataloader_ta
-        ]
-        for epoch in tqdm(range(self.config["epoch"])):
-            epoch_loss = 0
-            epoch_cnt = 0
-            features = []
-            for i in range(len(ts_samples)):
-                # service
-                ts_bg = ts_samples[i][0].to(device)
-                ts_labels = ts_samples[i][1].to(device)
-                ts_feats = ts_bg.ndata["attr"].float()
-                ts_logits = model_ts(ts_bg, ts_feats)
-                ts_loss = F.cross_entropy(ts_logits, ts_labels)
-                # anomaly_type
-                ta_bg = ta_samples[i][0].to(device)
-                ta_labels = ta_samples[i][1].to(device)
-                ta_feats = ta_bg.ndata["attr"].float()
-                ta_logits = model_ta(ta_bg, ta_feats)
-                ta_loss = F.cross_entropy(ta_logits, ta_labels)
-
-                opt_ts.zero_grad()
-                opt_ta.zero_grad()
-
-                total_loss = weight * ts_loss + (1 - weight) * ta_loss
-                total_loss.backward()
-                opt_ts.step()
-                opt_ta.step()
-                epoch_loss += total_loss.detach().item()
-                epoch_cnt += 1
-            losses.append(epoch_loss / epoch_cnt)
-            if (
-                len(losses) > self.config["win_size"]
-                and abs(losses[-self.config["win_size"]] - losses[-1])
-                < self.config["win_threshold"]
-            ):
-                break
-        return model_ts, model_ta
-
-
     def testv2(self, model, dataset, task, out_file, save_file=None):
         model.eval()
         dataloader = DataLoader(
@@ -535,7 +440,7 @@ class UnircaLab:
 
                 # 定位到实例级别
                 accs, ins_res = self.test_instance_local(ser_res, max_num=2)
-                ins_res.to_csv(f"{out_dir}/multitask_seed{seed}_{out_file}")
+                ins_res.to_csv(f"{out_dir}/service_seed{seed}_{out_file}")
                 columns = ["A@1", "A@2", "A@3", "A@4", "A@5"]
             else:
                 raise Exception("Unknow task")
@@ -607,7 +512,8 @@ class UnircaLab:
         # 训练
         s = time.time()
 
-        model_ts, model_ta = self.multi_trainv0(
+        # 只训练service模型
+        model_ts = self.train(
             UnircaDataset(
                 os.path.join(save_dir, "train_Xs.pkl"),
                 os.path.join(save_dir, "train_ys_service.pkl"),
@@ -616,14 +522,7 @@ class UnircaLab:
                 aug_size=self.config["aug_size"],
                 shuffle=True,
             ),
-            UnircaDataset(
-                os.path.join(save_dir, "train_Xs.pkl"),
-                os.path.join(save_dir, "train_ys_anomaly_type.pkl"),
-                os.path.join(save_dir, "topology.pkl"),
-                aug=self.config["aug"],
-                aug_size=self.config["aug_size"],
-                shuffle=True,
-            ),
+            "N_S"
         )
         
         print("instance")
@@ -635,10 +534,9 @@ class UnircaLab:
                 os.path.join(save_dir, "topology.pkl"),
             ),
             "instance",
-            "instance_pred_multi_v0.csv",
-            "instance_acc_multi_v0.csv",
+            "instance_pred_service.csv",
+            "instance_acc_service.csv",
         )
         # 保存模型
         if self.config["save_model"]:
             torch.save(model_ts, os.path.join(save_dir, "service_model.pt"))
-            torch.save(model_ta, os.path.join(save_dir, "anomaly_type_model.pt"))

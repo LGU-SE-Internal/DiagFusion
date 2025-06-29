@@ -14,12 +14,7 @@ class FastTextLab:
         else:
             self.method = fasttext.train_unsupervised
         self.nodes = config["nodes"].split()
-        self.anomaly_types = np.append("[normal]", cases["anomaly_type"].unique())
-        self.anomaly_type_labels = dict(
-            zip(self.anomaly_types, range(len(self.anomaly_types)))
-        )
         self.node_labels = dict(zip(self.nodes, range(len(self.nodes))))
-        print(self.anomaly_type_labels)
         self.train_data, self.test_data = self.prepare_data()
 
     def prepare_data(self):
@@ -51,54 +46,45 @@ class FastTextLab:
             epoch=self.config["epoch"],
         )
         random.seed(0)
-        for anomaly_type in self.anomaly_types:
-            for node in self.nodes:
-                sample_count = len(
-                    [
-                        text
-                        for text in self.train_data
-                        if text.split("__label__")[-1]
-                        == str(self.node_labels[node])
-                        + str(self.anomaly_type_labels[anomaly_type])
-                    ]
-                )
-                if sample_count == 0:
-                    continue
-                anomaly_texts = [
+        for node in self.nodes:
+            sample_count = len(
+                [
                     text
                     for text in self.train_data
-                    if text.split("\t")[-1]
-                    == f"__label__{self.node_labels[node]}{self.anomaly_type_labels[anomaly_type]}"
+                    if text.split("__label__")[-1] == str(self.node_labels[node])
                 ]
-                loop = 0
-                while sample_count < self.config["sample_count"]:
-                    loop += 1
-                    if loop >= 10 * self.config["sample_count"]:
-                        break
-                    # 随机选取相应label的序列进行复制
-                    chosen_text, label = anomaly_texts[
-                        random.randint(0, len(anomaly_texts) - 1)
-                    ].split("\t")
-                    chosen_text_splits = chosen_text.split()
-                    if len(chosen_text_splits) < self.config["minCount"]:
-                        continue
-                    # 随机选取若干事件进行替换
-                    edit_event_ids = random.sample(
-                        range(len(chosen_text_splits)), self.config["edit_count"]
-                    )
-                    for event_id in edit_event_ids:
-                        # 替换被选中的事件，选取离他距离最近的事件用于替换
-                        nearest_event = model.get_nearest_neighbors(
-                            chosen_text_splits[event_id]
-                        )[0][-1]
-                        chosen_text_splits[event_id] = nearest_event
-                    da_train_data.append(
-                        " ".join(chosen_text_splits)
-                        + f"\t__label__{self.node_labels[node]}{self.anomaly_type_labels[anomaly_type]}"
-                    )
-                    sample_count += 1
+            )
+            if sample_count == 0:
+                continue
+            service_texts = [
+                text
+                for text in self.train_data
+                if text.split("\t")[-1] == f"__label__{self.node_labels[node]}"
+            ]
+            loop = 0
+            while sample_count < self.config["sample_count"]:
+                loop += 1
+                if loop >= 10 * self.config["sample_count"]:
+                    break
+                chosen_text, label = service_texts[
+                    random.randint(0, len(service_texts) - 1)
+                ].split("\t")
+                chosen_text_splits = chosen_text.split()
+                if len(chosen_text_splits) < self.config["minCount"]:
+                    continue
+                edit_event_ids = random.sample(
+                    range(len(chosen_text_splits)), self.config["edit_count"]
+                )
+                for event_id in edit_event_ids:
+                    nearest_event = model.get_nearest_neighbors(
+                        chosen_text_splits[event_id]
+                    )[0][-1]
+                    chosen_text_splits[event_id] = nearest_event
+                da_train_data.append(
+                    " ".join(chosen_text_splits) + f"\t__label__{self.node_labels[node]}"
+                )
+                sample_count += 1
 
-        #                 words = []
         with open(self.config["train_da_path"], "w") as f:
             for text in da_train_data:
                 f.write(text + "\n")
@@ -129,14 +115,14 @@ class FastTextLab:
                         if fillna and len(text) == 0:
                             text = "None"
                         f.write(
-                            f"{text}\t__label__{self.node_labels[node_info[0]]}{self.anomaly_type_labels[node_info[1]]}\n"
+                            f"{text}\t__label__{self.node_labels[node_info[0]]}\n"
                         )
                     elif isinstance(text, list):
                         text = " ".join(text)
                         if fillna and len(text) == 0:
                             text = "None"
                         f.write(
-                            f"{text}\t__label__{self.node_labels[node_info[0]]}{self.anomaly_type_labels[node_info[1]]}\n"
+                            f"{text}\t__label__{self.node_labels[node_info[0]]}\n"
                         )
                     else:
                         raise Exception("type error")

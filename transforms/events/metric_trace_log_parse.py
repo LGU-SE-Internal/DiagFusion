@@ -24,18 +24,14 @@ def metric_trace_log_parse(trace, metric, logs, labels, save_path, nodes):
 
     service_name = nodes.split()
     anomaly_service = list(labels["instance"])
-    anomaly_type = [str(x) for x in list(labels["anomaly_type"])]
 
     demo_metric = {x: {} for x in labels.index}
     k = 0
     for case_id, v in tqdm(demo_metric.items()):
         anomaly_service_name = anomaly_service[k]
-        anomaly_service_type = anomaly_type[k]
         k += 1
-        inner_dict_key = [
-            (x, anomaly_service_type) if x == anomaly_service_name else (x, "[normal]")
-            for x in service_name
-        ]
+        # 只保留service信息
+        inner_dict_key = [(x, "[normal]") if x != anomaly_service_name else (x, "anomaly") for x in service_name]
         # 指标
         if not metric is None:
             demo_metric[case_id] = {
