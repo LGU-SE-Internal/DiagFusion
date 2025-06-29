@@ -5,6 +5,10 @@
 uv venv diagfusion --python=3.10.16
 source diagfusion/bin/activate
 uv pip install -r requirements.txt
+deactivate
+uv venv dataprocess --python=3.13.4
+source dataprocess/bin/activate
+uv pip install -r ./DataProcess/requirements.txt
 ```
 
 ## Dataset

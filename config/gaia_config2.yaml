@@ -10,9 +10,19 @@ fasttext:
   epoch: 5
   fasttext_dir: fasttext
   minCount: 1
-  nodes: ts-basic-service-x8dxb8 ts-basic-service-ndb7w5 ts-inside-payment-8r7bxl
+  nodes: ts-basic-service-qxqqpq ts-basic-service-x8dxb8 ts-basic-service-ndb7w5 ts-inside-payment-8r7bxl
     ts-inside-payment-qhdwmb ts-inside-payment-lr88cd ts-order-other-tbln4n ts-order-other-q68g97
-    ts-order-service-bddfbg ts-preserve-service-mzjl25 ts-route-plan-f25v4c
+    ts-order-other-lwk4xx ts-order-other-rsrlbh ts-order-service-bddfbg ts-preserve-service-mzjl25
+    ts-price-service-rr7n9m ts-route-plan-f25v4c ts-route-plan-jg2cwq ts-route-plan-kj6xtt
+    ts-route-plan-sdbl5c ts-seat-service-tt48gv ts-seat-service-4824m8 ts-seat-service-wbwjcj
+    ts-station-service-8hbg86 ts-station-service-8wfnfr ts-station-service-sfm9pl
+    ts-train-food-9vctrp ts-train-service-qw4t9k ts-travel-plan-vpklkl ts-travel-plan-6xlqgn
+    ts-travel-plan-m5p95z ts-ui-dashboard-64b4lp ts-ui-dashboard-gttgbb ts-ui-dashboard-7mcsqg
+    ts-ui-dashboard-g6bztc ts-user-service-9rhvsp ts-user-service-vdw9q7 ts-admin-basic-drwh4c
+    ts-admin-order-rx9wdj ts-admin-route-bhrj66 ts-auth-service-l5cmf8 ts-basic-service-4d2cdh
+    ts-basic-service-7nmjwm ts-basic-service-sgkml8 ts-food-service-nj4x4q ts-food-service-kv2ppk
+    ts-order-service-xsdtm2 ts-preserve-other-gfbkhk ts-route-plan-5t447p ts-route-plan-2ncfr8
+    ts-route-plan-9448qs ts-route-plan-76mdqb ts-route-plan-vhjn9g
   sample_count: 1000
   save_path: fasttext/event_embedding.pkl
   supervised: true
@@ -34,7 +44,7 @@ feature_list:
 feature_path: data/gaia/feature
 he_dgl:
   N_A: 27
-  N_S: 6
+  N_S: 20
   TOPK_SA: 10
   Xs: sentence_embedding.pkl
   aug: false
@@ -45,9 +55,19 @@ he_dgl:
   epoch: 6000
   heterogeneous: false
   lr: 0.001
-  nodes: ts-basic-service-x8dxb8 ts-basic-service-ndb7w5 ts-inside-payment-8r7bxl
+  nodes: ts-basic-service-qxqqpq ts-basic-service-x8dxb8 ts-basic-service-ndb7w5 ts-inside-payment-8r7bxl
     ts-inside-payment-qhdwmb ts-inside-payment-lr88cd ts-order-other-tbln4n ts-order-other-q68g97
-    ts-order-service-bddfbg ts-preserve-service-mzjl25 ts-route-plan-f25v4c
+    ts-order-other-lwk4xx ts-order-other-rsrlbh ts-order-service-bddfbg ts-preserve-service-mzjl25
+    ts-price-service-rr7n9m ts-route-plan-f25v4c ts-route-plan-jg2cwq ts-route-plan-kj6xtt
+    ts-route-plan-sdbl5c ts-seat-service-tt48gv ts-seat-service-4824m8 ts-seat-service-wbwjcj
+    ts-station-service-8hbg86 ts-station-service-8wfnfr ts-station-service-sfm9pl
+    ts-train-food-9vctrp ts-train-service-qw4t9k ts-travel-plan-vpklkl ts-travel-plan-6xlqgn
+    ts-travel-plan-m5p95z ts-ui-dashboard-64b4lp ts-ui-dashboard-gttgbb ts-ui-dashboard-7mcsqg
+    ts-ui-dashboard-g6bztc ts-user-service-9rhvsp ts-user-service-vdw9q7 ts-admin-basic-drwh4c
+    ts-admin-order-rx9wdj ts-admin-route-bhrj66 ts-auth-service-l5cmf8 ts-basic-service-4d2cdh
+    ts-basic-service-7nmjwm ts-basic-service-sgkml8 ts-food-service-nj4x4q ts-food-service-kv2ppk
+    ts-order-service-xsdtm2 ts-preserve-other-gfbkhk ts-route-plan-5t447p ts-route-plan-2ncfr8
+    ts-route-plan-9448qs ts-route-plan-76mdqb ts-route-plan-vhjn9g
   run_table: gt.csv
   save_dir: dgl/stratification_10
   save_model: false
@@ -62,15 +82,25 @@ metric_path: data/gaia/demo/metric
 parse:
   log_path: anomalies/stratification_logs.npy
   metric_path: anomalies/demo_metric.json
-  nodes: ts-basic-service-x8dxb8 ts-basic-service-ndb7w5 ts-inside-payment-8r7bxl
+  nodes: ts-basic-service-qxqqpq ts-basic-service-x8dxb8 ts-basic-service-ndb7w5 ts-inside-payment-8r7bxl
     ts-inside-payment-qhdwmb ts-inside-payment-lr88cd ts-order-other-tbln4n ts-order-other-q68g97
-    ts-order-service-bddfbg ts-preserve-service-mzjl25 ts-route-plan-f25v4c
+    ts-order-other-lwk4xx ts-order-other-rsrlbh ts-order-service-bddfbg ts-preserve-service-mzjl25
+    ts-price-service-rr7n9m ts-route-plan-f25v4c ts-route-plan-jg2cwq ts-route-plan-kj6xtt
+    ts-route-plan-sdbl5c ts-seat-service-tt48gv ts-seat-service-4824m8 ts-seat-service-wbwjcj
+    ts-station-service-8hbg86 ts-station-service-8wfnfr ts-station-service-sfm9pl
+    ts-train-food-9vctrp ts-train-service-qw4t9k ts-travel-plan-vpklkl ts-travel-plan-6xlqgn
+    ts-travel-plan-m5p95z ts-ui-dashboard-64b4lp ts-ui-dashboard-gttgbb ts-ui-dashboard-7mcsqg
+    ts-ui-dashboard-g6bztc ts-user-service-9rhvsp ts-user-service-vdw9q7 ts-admin-basic-drwh4c
+    ts-admin-order-rx9wdj ts-admin-route-bhrj66 ts-auth-service-l5cmf8 ts-basic-service-4d2cdh
+    ts-basic-service-7nmjwm ts-basic-service-sgkml8 ts-food-service-nj4x4q ts-food-service-kv2ppk
+    ts-order-service-xsdtm2 ts-preserve-other-gfbkhk ts-route-plan-5t447p ts-route-plan-2ncfr8
+    ts-route-plan-9448qs ts-route-plan-76mdqb ts-route-plan-vhjn9g
   parse_dir: parse
   save_path: parse/stratification_texts.pkl
   trace_path: anomalies/demo_trace.json
 result_path: result/gaia/analysis
 sentence_embedding:
-  K_S: 10
+  K_S: 50
   save_path: sentence_embedding.pkl
   source_path: fasttext/event_embedding.pkl
   test_path: fasttext/temp/test.txt
