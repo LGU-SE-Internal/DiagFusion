@@ -1,9 +1,8 @@
 from pathlib import Path
-from preprocess import process_data
+from process_data import process_data
 import pandas as pd
 # Set current working directory
-import os
-os.chdir('/home/nn/workspace/DiagFusion/DataProcess')
+
 
 
 def main():

@@ -10,7 +10,7 @@ def update_config_nodes():
     3. 更新K_S为instance的数量
     """
     # 读取gt.csv文件
-    gt_path = Path("../data/gaia/demo/demo2/gt.csv")
+    gt_path = Path("../data/rcabench/demo/demo2/gt.csv")
     # 确保gt.csv所在目录存在
     gt_path.parent.mkdir(parents=True, exist_ok=True)
     gt_df = pd.read_csv(gt_path)

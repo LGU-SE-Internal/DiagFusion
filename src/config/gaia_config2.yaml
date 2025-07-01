@@ -1,7 +1,7 @@
-base_path: .
+base_path: src
 dataset: rcabench
-demo_path: data/gaia/demo
-event_path: data/gaia/events
+demo_path: data/rcabench/demo
+event_path: data/rcabench/events
 exploration_path: exploration/gaia/pics
 fasttext:
   da_method: w2v
@@ -31,7 +31,7 @@ feature_list:
   4: TFIDF_BOW_X
   5: TFIDF_NGram_X,
   6: BOW_NGram_X
-feature_path: data/gaia/feature
+feature_path: data/rcabench/feature
 he_dgl:
   N_S: 7
   TOPK_SA: 10
@@ -56,8 +56,8 @@ he_dgl:
   win_size: 10
   win_threshold: 0.0001
 label: demo2
-log_path: data/gaia/demo/log
-metric_path: data/gaia/demo/metric
+log_path: data/rcabench/demo/log
+metric_path: data/rcabench/demo/metric
 parse:
   log_path: anomalies/stratification_logs.npy
   metric_path: anomalies/demo_metric.json
@@ -67,12 +67,12 @@ parse:
   parse_dir: parse
   save_path: parse/stratification_texts.pkl
   trace_path: anomalies/demo_trace.json
-result_path: result/gaia/analysis
+result_path: result/rcabench/analysis
 sentence_embedding:
   K_S: 10
   save_path: sentence_embedding.pkl
   source_path: fasttext/event_embedding.pkl
   test_path: fasttext/temp/test.txt
   train_path: fasttext/temp/train.txt
-source_data_path: data/gaia/source_data
-trace_path: data/gaia/demo/trace
+source_data_path: data/rcabench/source_data
+trace_path: data/rcabench/demo/trace

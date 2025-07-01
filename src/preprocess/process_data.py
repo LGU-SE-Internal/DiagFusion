@@ -8,12 +8,12 @@ from dataset.dataset_trace import save_trace_data
 from pathlib import Path
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from DataProcess.config import update_config_nodes
+from preprocess.config import update_config_nodes
 
 
 def preprocess_injection(
         data_paths: list[Path],
-        output_path: str = "../data/gaia/demo/demo2/gt.csv",
+        output_path: str = "../data/rcabench/demo/demo2/gt.csv",
     ) -> pd.DataFrame:
         """从injection文件中提取信息生成ground truth数据
 

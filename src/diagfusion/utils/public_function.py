@@ -19,7 +19,7 @@ def get_config():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config")
     args = parser.parse_args()
-    with open(os.path.join("./config", args.config), "r", encoding="utf-8") as f:
+    with open(os.path.join("./src/config", args.config), "r", encoding="utf-8") as f:
         config = yaml.safe_load(f)
     return config
 
