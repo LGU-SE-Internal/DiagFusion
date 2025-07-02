@@ -10,9 +10,13 @@ fasttext:
   epoch: 5
   fasttext_dir: fasttext
   minCount: 1
-  nodes: ts-auth-service-l5cmf8 ts-travel-service-pgzhsb ts-travel-service-2hr4rj
-    ts-route-plan-s2h8rv ts-travel-service-s9rr52 ts-order-service-wfd7jc ts-seat-service-tt48gv
-    ts-route-plan-vv4msf ts-price-service-rr7n9m ts-travel2-service-jrl94z
+  nodes: ts-basic-service ts-price-service ts-station-service ts-route-service ts-inside-payment-service
+    ts-notification-service mysql ts-order-other-service ts-security-service ts-rebook-service
+    ts-travel-service ts-travel2-service ts-travel-plan-service ts-seat-service ts-order-service
+    ts-train-service ts-ui-dashboard ts-verification-code-service ts-food-service
+    ts-consign-service ts-user-service ts-admin-basic-info-service ts-admin-order-service
+    ts-admin-route-service ts-auth-service ts-preserve-other-service ts-station-food-service
+    ts-train-food-service
   sample_count: 1000
   save_path: fasttext/event_embedding.pkl
   supervised: true
@@ -33,7 +37,7 @@ feature_list:
   6: BOW_NGram_X
 feature_path: data/rcabench/feature
 he_dgl:
-  N_S: 7
+  N_S: 28
   TOPK_SA: 10
   Xs: sentence_embedding.pkl
   aug: false
@@ -44,9 +48,13 @@ he_dgl:
   epoch: 6000
   heterogeneous: false
   lr: 0.001
-  nodes: ts-auth-service-l5cmf8 ts-travel-service-pgzhsb ts-travel-service-2hr4rj
-    ts-route-plan-s2h8rv ts-travel-service-s9rr52 ts-order-service-wfd7jc ts-seat-service-tt48gv
-    ts-route-plan-vv4msf ts-price-service-rr7n9m ts-travel2-service-jrl94z
+  nodes: ts-basic-service ts-price-service ts-station-service ts-route-service ts-inside-payment-service
+    ts-notification-service mysql ts-order-other-service ts-security-service ts-rebook-service
+    ts-travel-service ts-travel2-service ts-travel-plan-service ts-seat-service ts-order-service
+    ts-train-service ts-ui-dashboard ts-verification-code-service ts-food-service
+    ts-consign-service ts-user-service ts-admin-basic-info-service ts-admin-order-service
+    ts-admin-route-service ts-auth-service ts-preserve-other-service ts-station-food-service
+    ts-train-food-service
   run_table: gt.csv
   save_dir: dgl/stratification_10
   save_model: false
@@ -61,15 +69,19 @@ metric_path: data/rcabench/demo/metric
 parse:
   log_path: anomalies/stratification_logs.npy
   metric_path: anomalies/demo_metric.json
-  nodes: ts-auth-service-l5cmf8 ts-travel-service-pgzhsb ts-travel-service-2hr4rj
-    ts-route-plan-s2h8rv ts-travel-service-s9rr52 ts-order-service-wfd7jc ts-seat-service-tt48gv
-    ts-route-plan-vv4msf ts-price-service-rr7n9m ts-travel2-service-jrl94z
+  nodes: ts-basic-service ts-price-service ts-station-service ts-route-service ts-inside-payment-service
+    ts-notification-service mysql ts-order-other-service ts-security-service ts-rebook-service
+    ts-travel-service ts-travel2-service ts-travel-plan-service ts-seat-service ts-order-service
+    ts-train-service ts-ui-dashboard ts-verification-code-service ts-food-service
+    ts-consign-service ts-user-service ts-admin-basic-info-service ts-admin-order-service
+    ts-admin-route-service ts-auth-service ts-preserve-other-service ts-station-food-service
+    ts-train-food-service
   parse_dir: parse
   save_path: parse/stratification_texts.pkl
   trace_path: anomalies/demo_trace.json
 result_path: result/rcabench/analysis
 sentence_embedding:
-  K_S: 10
+  K_S: 28
   save_path: sentence_embedding.pkl
   source_path: fasttext/event_embedding.pkl
   test_path: fasttext/temp/test.txt

@@ -7,13 +7,13 @@ import pandas as pd
 
 def main():
     cases = pd.read_parquet(
-        "/mnt/jfs/rcabench-platform-v2/meta/rcabench_filtered/index.parquet"
+        "/mnt/jfs/rcabench-platform-v2/meta/rcabench_with_issues/index.parquet"
     )
     print(cases.columns)
-    top_10 = cases["datapack"].head(10).tolist()
+    top_10 = cases["datapack"].head(100).tolist()
 
     data_paths = [
-        Path(f"/mnt/jfs/rcabench-platform-v2/data/rcabench_filtered/{i}")
+        Path(f"/mnt/jfs/rcabench-platform-v2/data/rcabench_with_issues/{i}")
         for i in top_10
     ]
 

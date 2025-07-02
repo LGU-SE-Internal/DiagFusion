@@ -8,7 +8,27 @@ import hashlib
 import json
 from dataset.k_sigma import Ksigma
 
+
+
+# 使用示例
+def save_trace_data(data_paths, output_path="../data/rcabench/demo/demo2/anomalies/demo_trace.json"):
+    """处理并保存trace数据为JSON文件"""
+    # 确保输出目录存在
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
     
+    # 预处理数据
+    trace_dict = preprocess_trace_data(data_paths, cache_dir="./cache")
+    
+    # 保存为JSON文件
+    with open(output_path, 'w') as f:
+        json.dump(trace_dict, f, indent=4)
+    
+    print(f"Trace数据已保存到: {output_path}")
+    print(f"共处理了 {len(trace_dict)} 个case")
+    return trace_dict
+
+
 
 def preprocess_trace_data(paths: list[Path], cache_dir: str = "./cache") -> dict:
     """预处理trace数据并返回指定格式的字典
@@ -77,6 +97,12 @@ def preprocess_trace_data(paths: list[Path], cache_dir: str = "./cache") -> dict
             print(f"处理 case {case_id} 时出错: {str(e)}")
             continue
 
+    generate_service_topology(all_traces)
+
+    return processed_dict
+
+
+def generate_service_topology(all_traces):
     # 合并所有trace数据并生成topology
     if all_traces:
         all_traces_df = pd.concat(all_traces, ignore_index=True)
@@ -85,21 +111,19 @@ def preprocess_trace_data(paths: list[Path], cache_dir: str = "./cache") -> dict
         gt_path = "../data/rcabench/demo/demo2/gt.csv"
         gt_df = pd.read_csv(gt_path)
         services = gt_df["service"].unique().tolist()
-    
         # 服务ID到服务名称的映射
         service_id_to_name = {
             idx: service_name
             for idx, service_name in enumerate(services)
         }
+
         # 服务名称到ID的映射
         service_to_id = {
             service_name: idx
             for idx, service_name in enumerate(services)
         }
         # 创建实例到ID的映射
-        instance_to_id = {}
-        for i, instance in enumerate(gt_df['instance']):
-            instance_to_id[instance] = i
+        instance_to_id = service_to_id
 
         topology = _generate_topology(all_traces_df, service_to_id)
         
@@ -114,28 +138,9 @@ def preprocess_trace_data(paths: list[Path], cache_dir: str = "./cache") -> dict
             }, f, indent=4)
         print(f"Topology已保存到: {topology_path}")
 
-        # 直接传递topology给service_to_instance函数
         service_to_instance(topology, gt_df, service_id_to_name, instance_to_id)
 
-    return processed_dict
 
-# 使用示例
-def save_trace_data(data_paths, output_path="../data/rcabench/demo/demo2/anomalies/demo_trace.json"):
-    """处理并保存trace数据为JSON文件"""
-    # 确保输出目录存在
-    output_path = Path(output_path)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    
-    # 预处理数据
-    trace_dict = preprocess_trace_data(data_paths, cache_dir="./cache")
-    
-    # 保存为JSON文件
-    with open(output_path, 'w') as f:
-        json.dump(trace_dict, f, indent=4)
-    
-    print(f"Trace数据已保存到: {output_path}")
-    print(f"共处理了 {len(trace_dict)} 个case")
-    return trace_dict
 
 def _build_invoke_links(df):
     df = df.copy()
@@ -207,9 +212,6 @@ def _generate_topology(all_traces_df, service_to_id):
     return source_nodes, target_nodes
 
 
-
-
-
 def service_to_instance(topology=None, gt_df=None, service_id_to_name=None, instance_to_id=None):
     """将服务级别的拓扑转换为实例级别的拓扑
 
@@ -224,7 +226,7 @@ def service_to_instance(topology=None, gt_df=None, service_id_to_name=None, inst
     # 构建service_to_instances映射
     service_to_instances = {}
     for service in gt_df["service"].unique():
-        instances = gt_df[gt_df["service"] == service]["instance"].tolist()
+        instances = list(set(gt_df[gt_df["service"] == service]["instance"].tolist()))
         service_to_instances[service] = instances
 
     # 创建服务ID到实例ID的映射

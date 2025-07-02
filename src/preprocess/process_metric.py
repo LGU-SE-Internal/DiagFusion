@@ -21,13 +21,12 @@ def process_parquet_files(data_paths: list[Path]):
         parquet_file = fs["abnormal_metrics"]
         if not os.path.exists(parquet_file):
             continue
-            
-        # 从数据包路径解析instance-id
-        parts = data_pack.name.split('-')
-        # 获取服务名和实例ID
-        service_name = '-'.join(parts[1:4])  # 获取服务名部分
-        instance_suffix = parts[-1]  # 获取实例ID后缀
-        instance_id = f"{service_name}-{instance_suffix}"  # 组合成完整的instance-id
+
+        fs_injection = derive_filename_injection(data_pack)
+        # 读取injection文件
+        with open(fs_injection["injection"], 'r') as f:
+            injection = json.load(f)
+        instance_id = injection["ground_truth"]["service"][1] if len(injection["ground_truth"]["service"]) > 1 else injection["ground_truth"]["service"][0]
         
         try:
             # 读取 parquet 文件
@@ -100,4 +99,22 @@ def derive_filename(data_pack: Path) -> dict:
     sub_dir = data_pack.parent / base_name
     return {
         "abnormal_metrics": sub_dir / "abnormal_metrics.parquet",
+    }
+
+def derive_filename_injection(data_pack: Path) -> dict:
+    """
+    从数据包路径派生相关文件路径
+    
+    Args:
+        data_pack: 数据包路径
+        
+    Returns:
+        包含相关文件路径的字典
+    """
+    base_name = data_pack.stem
+    # 创建子目录路径
+    sub_dir = data_pack.parent / base_name
+    return {
+        "abnormal_logs": sub_dir / "abnormal_logs.parquet",
+        "injection": sub_dir / "injection.json",
     }
