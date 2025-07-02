@@ -10,7 +10,7 @@ import dgl
 import dgl.data.utils as U
 import time
 import pickle
-from models.layers import *
+from src.diagfusion.models.layers import *
 import warnings
 import json
 from ..data.dataset import UnircaDataset
