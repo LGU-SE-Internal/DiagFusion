@@ -13,8 +13,8 @@ import pickle
 from src.diagfusion.models.layers import *
 import warnings
 import json
-from ..data.dataset import UnircaDataset
-from ..data.preprocessing import RawDataProcess
+from src.diagfusion.data.dataset import UnircaDataset
+from src.diagfusion.data.preprocessing import RawDataProcess
 
 warnings.filterwarnings("ignore")
 

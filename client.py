@@ -1,19 +1,8 @@
 import os
-
-from src.diagfusion.models import He_DGL
+from src.exp.controller import UnircaLab
 from src.exp.config import deal_config, get_config
 import pandas as pd
-
-import json
-import math
-from tqdm import tqdm
-from src.diagfusion.data.preprocessing import metric_trace_log_parse
-
-import numpy as np
-import src.diagfusion.utils.public_function as pf
-import time
-from src.diagfusion.data.preprocessing import FastTextLab
-from src.diagfusion.data.preprocessing import sentence_embedding, run_parse, run_fasttext, run_sentence_embedding
+from src.diagfusion.data.preprocessing import run_parse, run_fasttext, run_sentence_embedding
 
 if __name__ == "__main__":
     print("[diagfusion]")
@@ -40,7 +29,7 @@ if __name__ == "__main__":
 
     print("[dgl]")
     lab_id = 9  # 实验唯一编号
-    He_DGL.UnircaLab(deal_config(config, "he_dgl")).do_lab(lab_id)
+    UnircaLab(deal_config(config, "he_dgl")).do_lab(lab_id)
 
 
 
