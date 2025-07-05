@@ -1,3 +1,4 @@
+import pickle
 from .dataset import RCABenchDataset, derive_filename
 from pathlib import Path
 from typing import Any
@@ -7,7 +8,8 @@ from .utils import load_injection_data, CacheManager
 import hashlib
 import json
 from dataset.k_sigma import Ksigma
-
+from src.utils.logger import logger
+import gc
 
 
 # 使用示例
@@ -24,81 +26,97 @@ def save_trace_data(data_paths, output_path="../data/rcabench/demo/demo2/anomali
     with open(output_path, 'w') as f:
         json.dump(trace_dict, f, indent=4)
     
-    print(f"Trace数据已保存到: {output_path}")
-    print(f"共处理了 {len(trace_dict)} 个case")
+    logger.success(f"Trace数据已保存到: {output_path}")
+    logger.info(f"共处理了 {len(trace_dict)} 个case")
     return trace_dict
 
 
-
 def preprocess_trace_data(paths: list[Path], cache_dir: str = "./cache") -> dict:
-    """预处理trace数据并返回指定格式的字典
-    
-    Returns:
-        dict: 格式为 {"case_id": [[timestamp, parent_service, service_name, score], ...]}
-    """
     processed_dict = {}
-    
-    # 确保缓存目录存在
-    Path(cache_dir).mkdir(parents=True, exist_ok=True)
-
-    # 用于收集所有trace数据的列表
     all_traces = []
+    batch_size = 5  # 每批处理5个数据包
+    
+    # 分批处理数据包
+    for batch_idx in range(0, len(paths), batch_size):
+        batch_paths = paths[batch_idx:batch_idx + batch_size]
+        batch_traces = []
+        
+        # 处理当前批次的数据包
+        for case_id, data_pack in enumerate(batch_paths, start=batch_idx):
+            try:
+                fs = derive_filename(data_pack)
+                abnormal_trace_df = pd.read_parquet(fs["abnormal_trace"])
+                
+                # 转换时间戳
+                abnormal_trace_df["timestamp"] = abnormal_trace_df["time"].apply(
+                    lambda x: int(x.timestamp() * 1000)
+                    if hasattr(x, "timestamp")
+                    else int(x / 1000)
+                )
 
-    # 处理每个数据包
-    for case_id, data_pack in enumerate(paths, start=0):
-        try:
-            fs = derive_filename(data_pack)
-            abnormal_trace_df = pd.read_parquet(fs["abnormal_trace"])
-            
-            # 转换时间戳
-            abnormal_trace_df["timestamp"] = abnormal_trace_df["time"].apply(
-                lambda x: int(x.timestamp() * 1000)  # 转换为毫秒级时间戳
-                if hasattr(x, "timestamp")
-                else int(x / 1000)  # 假设输入是微秒，转换为毫秒
-            )
+                # 构建调用关系
+                abnormal_trace_df = _build_invoke_links(abnormal_trace_df)
+                
+                # 收集trace数据用于生成topology（只保留必要的列以节省内存）
+                batch_traces.append(abnormal_trace_df[["service_name", "parent_service"]])
+                
+                # 使用 k_sigma 计算异常分数
+                k_sigma = Ksigma()
+                scores = []
+                for name, group in abnormal_trace_df.groupby(["service_name", "parent_service"]):
+                    group = group.sort_values("timestamp")
+                    if len(group) > 0:
+                        is_anomaly, _, score = k_sigma.detection(
+                            data=pd.DataFrame({
+                                "time": group["timestamp"].values,
+                                "value": group["duration"].values
+                            }),
+                            column="value",
+                            start_ts=group["timestamp"].min(),
+                            end_ts=group["timestamp"].max()
+                        )
+                        scores.extend([abs(score) if is_anomaly else 0] * len(group))
+                    else:
+                        scores.extend([0] * len(group))
+                
+                abnormal_trace_df["score"] = scores
 
-            # 构建调用关系
-            abnormal_trace_df = _build_invoke_links(abnormal_trace_df)
+                # 提取需要的列并转换为列表格式
+                trace_records = abnormal_trace_df[["timestamp", "parent_service", "service_name", "score"]].values.tolist()
+                
+                # 只保存结果，不保存整个DataFrame
+                if trace_records:
+                    processed_dict[str(case_id)] = trace_records
+                    logger.info(f"已处理完成 case {case_id}，生成 {len(trace_records)} 条记录")
+                
+                # 及时释放内存
+                del abnormal_trace_df
+                del scores
+                
+            except Exception as e:
+                logger.error(f"处理 case {case_id} 时出错: {str(e)}")
+                continue
+        
+        # 处理完一批后，更新all_traces并释放内存
+        if batch_traces:
+            # 只合并拓扑所需的数据
+            concat_df = pd.concat(batch_traces)
+            all_traces.append(concat_df)
+            del batch_traces
             
-            # 收集trace数据用于生成topology
-            all_traces.append(abnormal_trace_df)
-            
-            # 使用 k_sigma 计算异常分数
-            k_sigma = Ksigma()
-            scores = []
-            for name, group in abnormal_trace_df.groupby(["service_name", "parent_service"]):
-                group = group.sort_values("timestamp")
-                if len(group) > 0:
-                    # 对每个组使用 k_sigma 检测
-                    is_anomaly, _, score = k_sigma.detection(
-                        data=pd.DataFrame({
-                            "time": group["timestamp"].values,
-                            "value": group["duration"].values  # 使用duration字段进行异常检测
-                        }),
-                        column="value",
-                        start_ts=group["timestamp"].min(),
-                        end_ts=group["timestamp"].max()
-                    )
-                    scores.extend([abs(score) if is_anomaly else 0] * len(group))
-                else:
-                    scores.extend([0] * len(group))
-            
-            abnormal_trace_df["score"] = scores
-
-            # 提取需要的列并转换为列表格式
-            trace_records = abnormal_trace_df[["timestamp", "parent_service", "service_name", "score"]].values.tolist()
-            
-            # 只有当有记录时才添加到结果字典
-            if trace_records:
-                processed_dict[str(case_id)] = trace_records
-                print(f"已处理完成 case {case_id}")
-
-        except Exception as e:
-            print(f"处理 case {case_id} 时出错: {str(e)}")
-            continue
-
+        # 强制垃圾回收
+        import gc
+        gc.collect()
+        
+        # 可选：每处理一批后将中间结果保存到磁盘
+        # temp_file = f"temp_processed_dict_batch_{batch_idx}.pkl"
+        # with open(temp_file, 'wb') as f:
+        #     pickle.dump(processed_dict, f)
+        # print(f"已保存批次 {batch_idx} 的中间结果到 {temp_file}")
+    
     generate_service_topology(all_traces)
-
+    
+        
     return processed_dict
 
 
@@ -136,7 +154,7 @@ def generate_service_topology(all_traces):
                 "source_nodes": topology[0],
                 "target_nodes": topology[1]
             }, f, indent=4)
-        print(f"Topology已保存到: {topology_path}")
+        logger.success(f"服务拓扑已保存到: {topology_path}")
 
         service_to_instance(topology, gt_df, service_id_to_name, instance_to_id)
 
@@ -245,7 +263,7 @@ def service_to_instance(topology=None, gt_df=None, service_id_to_name=None, inst
             "service_instance_map": service_instance_map,
             "instance_to_id": instance_to_id
         }, f, indent=4)
-    print(f"服务ID与实例ID的映射已保存到: {mapping_path}")
+    logger.success(f"服务ID与实例ID的映射已保存到: {mapping_path}")
 
     if topology is None:
         # 如果没有传入topology，则从文件读取
@@ -283,4 +301,4 @@ def service_to_instance(topology=None, gt_df=None, service_id_to_name=None, inst
             "target_nodes": target_nodes,
             "instance_to_id": instance_to_id
         }, f, indent=4)
-    print(f"实例级别的拓扑已保存到: {instance_topology_path}")
+    logger.success(f"实例级别的拓扑已保存到: {instance_topology_path}")

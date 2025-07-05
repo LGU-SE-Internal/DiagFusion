@@ -10,3 +10,4 @@ tqdm==4.64.0
 dgl==0.9.1
 fasttext==0.9.3
 jsonpickle==2.2.0 
+loguru

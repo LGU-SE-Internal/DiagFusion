@@ -15,6 +15,7 @@ import warnings
 import json
 from src.diagfusion.data.dataset import UnircaDataset
 from src.diagfusion.data.preprocessing import RawDataProcess
+from src.utils.logger import logger
 
 warnings.filterwarnings("ignore")
 
@@ -65,7 +66,7 @@ class UnircaLab:
             )
         else:
             model = TAGClassifier(in_dim, hid_dim, out_dim).to(device)
-        print(model)
+        logger.info(model)
 
         opt = torch.optim.Adam(
             model.parameters(),
@@ -171,7 +172,6 @@ class UnircaLab:
                     key=lambda x: x[-1],
                     reverse=True,
                 )
-                # print(self.topoinfo[s_pred[col]], temp)
                 ins_pred.extend([item[0] for item in temp[:max_num]])
             ins_preds.append(ins_pred[:5])
             for k in range(5):
@@ -179,7 +179,7 @@ class UnircaLab:
                     topks[k:] += 1
                     break
             i += 1
-        print("Top1-5: ", topks / len(test_cases))
+        logger.info("Top1-5: {}".format(topks / len(test_cases)))
         y_true = np.array(
             [self.ins_dict[ins] for ins in test_cases["instance"].values]
         ).reshape(-1, 1)
@@ -212,7 +212,7 @@ class UnircaLab:
             "N_S"
         )
         
-        print("instance")
+        logger.info("instance")
         _, _ = self.testv2(
             model_ts,
             UnircaDataset(

@@ -1,6 +1,7 @@
 import pandas as pd
 import yaml
 from pathlib import Path
+from src.utils.logger import logger
 
 def update_config_nodes():
     """
@@ -46,7 +47,7 @@ def update_config_nodes():
     with open(config_path, 'w') as f:
         yaml.dump(config, f, default_flow_style=False, allow_unicode=True)
     
-    print("配置文件已更新！")
-    print(f"更新的nodes为: {nodes_str}")
-    print(f"更新的N_S（服务数量）为: {service_count}")
-    print(f"更新的K_S（instance数量）为: {instance_count}")
+    logger.success("配置文件已更新！")
+    logger.info(f"更新的nodes为: {nodes_str}")
+    logger.info(f"更新的N_S（服务数量）为: {service_count}")
+    logger.info(f"更新的K_S（instance数量）为: {instance_count}")

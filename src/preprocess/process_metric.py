@@ -3,6 +3,9 @@ import json
 import pandas as pd
 from dataset.k_sigma import Ksigma
 from pathlib import Path
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+from src.utils.logger import logger
 
 
 def process_parquet_files(data_paths: list[Path]):
@@ -27,14 +30,15 @@ def process_parquet_files(data_paths: list[Path]):
         with open(fs_injection["injection"], 'r') as f:
             injection = json.load(f)
         instance_id = injection["ground_truth"]["service"][1] if len(injection["ground_truth"]["service"]) > 1 else injection["ground_truth"]["service"][0]
-        
+        # instance_id = injection["ground_truth"]["service"][0]
+
         try:
             # 读取 parquet 文件
             df = pd.read_parquet(parquet_file)
             
             # 确保数据框包含必要的列
             if 'time' not in df.columns or 'value' not in df.columns:
-                print(f"跳过 {data_pack.name}: 缺少必要的列")
+                logger.warning(f"跳过 {data_pack.name}: 缺少必要的列")
                 continue
 
             metric_name = df['metric'].iloc[0]  # 从数据中获取metric字段的值
@@ -66,10 +70,10 @@ def process_parquet_files(data_paths: list[Path]):
                     metric_name,
                     float(anomaly_score)
                 ])
-                print(f"已处理完成 case {case_id}")
+                logger.info(f"已处理完成 case {case_id}, 检测到异常，score: {anomaly_score:.4f}")
                 
         except Exception as e:
-            print(f"处理 {data_pack.name} 时出错: {str(e)}")
+            logger.error(f"处理 {data_pack.name} 时出错: {str(e)}")
             continue
     
     # 设置输出路径并确保目录存在
@@ -79,8 +83,8 @@ def process_parquet_files(data_paths: list[Path]):
     with open(output_file, 'w') as f:
         json.dump(case_dict, f, indent=4)
     
-    print(f"处理完成，结果已保存到: {output_file}")
-    print(f"共处理了 {len(case_dict)} 个case")
+    logger.success(f"处理完成，结果已保存到: {output_file}")
+    logger.info(f"共处理了 {len(case_dict)} 个case")
     
     return case_dict
 

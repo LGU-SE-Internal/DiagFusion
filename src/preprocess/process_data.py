@@ -9,6 +9,7 @@ from pathlib import Path
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from preprocess.config import update_config_nodes
+from src.utils.logger import logger
 
 
 def preprocess_injection(
@@ -43,6 +44,7 @@ def preprocess_injection(
             
             # 从ground_truth中获取service信息
             service = injection["ground_truth"]["service"][1] if len(injection["ground_truth"]["service"]) > 1 else injection["ground_truth"]["service"][0]
+            # service = injection["ground_truth"]["service"][0]
             instance = service
 
             # 提取时间信息
@@ -71,7 +73,7 @@ def preprocess_injection(
         df['data_type'] = ['train'] * train_size + ['test'] * (n - train_size)
         
         df.to_csv(output_path, index=False)
-        print(f"Ground truth数据已保存到: {output_path}")
+        logger.success(f"Ground truth数据已保存到: {output_path}")
         
         return df
 

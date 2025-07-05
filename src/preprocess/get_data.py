@@ -1,7 +1,11 @@
+import os
+import argparse
 from pathlib import Path
 from process_data import process_data
 import pandas as pd
-# Set current working directory
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from src.utils.logger import logger, setup_logger
 
 
 
@@ -9,8 +13,8 @@ def main():
     cases = pd.read_parquet(
         "/mnt/jfs/rcabench-platform-v2/meta/rcabench_with_issues/index.parquet"
     )
-    print(cases.columns)
-    top_10 = cases["datapack"].head(100).tolist()
+    logger.info(cases.columns)
+    top_10 = cases["datapack"].head(10).tolist()
 
     data_paths = [
         Path(f"/mnt/jfs/rcabench-platform-v2/data/rcabench_with_issues/{i}")

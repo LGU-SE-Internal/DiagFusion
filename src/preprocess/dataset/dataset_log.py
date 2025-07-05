@@ -6,8 +6,8 @@ from .utils import CacheManager
 import numpy as np
 import pandas as pd
 from .dataset import RCABenchDataset
+from src.utils.logger import logger
 
-_global_bert_encoder = None
 
 
 def derive_filename(data_pack: Path) -> dict:
@@ -235,8 +235,8 @@ def preprocess_logs(
     save_path.parent.mkdir(parents=True, exist_ok=True)
     np.save(str(save_path), np.array(log_sequences, dtype=object))
     
-    print(f"已保存日志序列，形状: {len(log_sequences)}")
-    print(f"第一个序列示例: {log_sequences[0][:3]}")
+    logger.success(f"已保存日志序列，形状: {len(log_sequences)}")
+    logger.info(f"第一个序列示例: {log_sequences[0][:3]}")
     
     return log_sequences
 
