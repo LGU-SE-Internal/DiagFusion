@@ -42,7 +42,10 @@ def preprocess_injection(
             with open(fs["injection"], 'r') as f:
                 injection = json.load(f)
             
-            # 从ground_truth中获取service信息
+            # 没找到 groundtruth 字段，跳过
+            if "ground_truth" not in injection:
+                continue
+                
             service = injection["ground_truth"]["service"][1] if len(injection["ground_truth"]["service"]) > 1 else injection["ground_truth"]["service"][0]
             # service = injection["ground_truth"]["service"][0]
             instance = service

@@ -17,8 +17,7 @@ def save_trace_data(data_paths, output_path="../data/rcabench/demo/demo2/anomali
     """处理并保存trace数据为JSON文件"""
     # 确保输出目录存在
     output_path = Path(output_path)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    
+    output_path.parent.mkdir(parents=True, exist_ok=True)  
     # 预处理数据
     trace_dict = preprocess_trace_data(data_paths, cache_dir="./cache")
     
@@ -45,6 +44,16 @@ def preprocess_trace_data(paths: list[Path], cache_dir: str = "./cache") -> dict
         for case_id, data_pack in enumerate(batch_paths, start=batch_idx):
             try:
                 fs = derive_filename(data_pack)
+                
+                # 读取injection文件
+                with open(fs["injection"], 'r') as f:
+                    injection = json.load(f)
+            
+                # 没找到 groundtruth 字段，跳过
+                if "ground_truth" not in injection:
+                    continue
+                
+                
                 abnormal_trace_df = pd.read_parquet(fs["abnormal_trace"])
                 
                 # 转换时间戳
@@ -191,9 +200,6 @@ def _generate_topology(all_traces_df, service_to_id):
         list(all_traces_df["parent_service"].unique())
     )))
         
-    # 过滤出目标服务
-    filtered_services = [s for s in all_services if s in target_services]
-        
     # 收集所有的服务调用关系
     edges = set()
     # 过滤出只包含目标服务的调用关系
@@ -207,7 +213,8 @@ def _generate_topology(all_traces_df, service_to_id):
         if pd.notna(row["parent_service"]):  # 确保parent_service不是NA
             source_id = service_to_id[row["parent_service"]]
             target_id = service_to_id[row["service_name"]]
-            # 添加双向边
+            # 添加双向边,但跳过自环
+            # if source_id != target_id:
             edges.add((source_id, target_id))
             edges.add((target_id, source_id))
         

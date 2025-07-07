@@ -3,6 +3,6 @@
 *.csv
 *.npy
 temp_logs/
-data/
 cache/
 *.pkl
+*.txt

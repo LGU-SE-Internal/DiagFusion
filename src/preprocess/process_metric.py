@@ -29,6 +29,10 @@ def process_parquet_files(data_paths: list[Path]):
         # 读取injection文件
         with open(fs_injection["injection"], 'r') as f:
             injection = json.load(f)
+        # 没找到 groundtruth 字段，跳过
+        if "ground_truth" not in injection:
+            continue
+
         instance_id = injection["ground_truth"]["service"][1] if len(injection["ground_truth"]["service"]) > 1 else injection["ground_truth"]["service"][0]
         # instance_id = injection["ground_truth"]["service"][0]
 
@@ -103,6 +107,7 @@ def derive_filename(data_pack: Path) -> dict:
     sub_dir = data_pack.parent / base_name
     return {
         "abnormal_metrics": sub_dir / "abnormal_metrics.parquet",
+        "injection": sub_dir / "injection.json",
     }
 
 def derive_filename_injection(data_pack: Path) -> dict:

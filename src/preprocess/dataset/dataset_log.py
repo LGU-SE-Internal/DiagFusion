@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 from pathlib import Path
@@ -206,6 +207,14 @@ def preprocess_logs(
             raise FileNotFoundError(f"Abnormal log file not found for {data_pack.name}")
         if "injection" not in fs or not os.path.exists(fs["injection"]):
             raise FileNotFoundError(f"Injection file not found for {data_pack.name}")
+        
+        # 读取injection文件
+        with open(fs["injection"], 'r') as f:
+            injection = json.load(f)
+            
+        # 没找到 groundtruth 字段，跳过
+        if "ground_truth" not in injection:
+            continue
 
         # 读取并预处理数据
         df = pd.read_parquet(fs["abnormal_logs"])
