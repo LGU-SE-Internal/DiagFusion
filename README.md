@@ -5,10 +5,14 @@
 uv venv diagfusion --python=3.10.16
 source diagfusion/bin/activate
 uv pip install -r requirements.txt
-deactivate
-uv venv dataprocess --python=3.13.4
-source dataprocess/bin/activate
-uv pip install -r ./DataProcess/requirements.txt
+
+uv sync
+source .venv/bin/activate
+
+mkdir data
+cd data
+ln -s /mnt/jfs/rcabench_dataset ./
+ln -s /mnt/jfs/rcabench-platform-v2 ./
 ```
 
 ## Dataset
@@ -20,6 +24,7 @@ D1 contains two datasets: MicroSS and Companion Data. We use MicroSS, for it pro
 We provide a demo. Please run:
 ```
 python main.py --config gaia_config.yaml
+./main.py eval single diagfusion rcabench_with_issues ts0-ts-food-service-cpu-exhaustion-mw5lzv
 ```
 
 ## Parameter Description in the Demo
