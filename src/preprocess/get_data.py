@@ -2,13 +2,13 @@ import json
 import os
 import argparse
 from pathlib import Path
-from process_data import process_data
+from src.preprocess.process_data import process_data
 import pandas as pd
 import sys
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from src.utils.logger import logger, setup_logger
-from dataset.dataset_log import derive_filename
-
+from src.preprocess.dataset.dataset_log import derive_filename
 
 
 def main():

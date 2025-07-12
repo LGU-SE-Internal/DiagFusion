@@ -19,6 +19,7 @@ from src.utils.logger import logger
 
 warnings.filterwarnings("ignore")
 
+
 class UnircaLab:
     def __init__(self, config):
         self.config = config
@@ -30,10 +31,12 @@ class UnircaLab:
         if config["dataset"] == "rcabench":
             # 从service_instance_mapping.json读取拓扑信息
             mapping_path = "/home/nn/workspace/DiagFusion/src/data/rcabench/demo/demo2/anomalies/service_instance_mapping.json"
-            with open(mapping_path, 'r') as f:
+            with open(mapping_path, "r") as f:
                 mapping_data = json.load(f)
                 # 将service_instance_map的键转换为整数
-                self.topoinfo = {int(k): v for k, v in mapping_data["service_instance_map"].items()}
+                self.topoinfo = {
+                    int(k): v for k, v in mapping_data["service_instance_map"].items()
+                }
         else:
             raise Exception("Unknow dataset")
 
@@ -61,9 +64,7 @@ class UnircaLab:
         hid_dim = int(np.sqrt(in_dim * out_dim))
         if self.config["heterogeneous"]:
             etype = U.load_info(os.path.join(self.config["save_dir"], "edge_types.pkl"))
-            model = RGCNClassifier(in_dim, hid_dim, out_dim, etype).to(
-                device
-            )
+            model = RGCNClassifier(in_dim, hid_dim, out_dim, etype).to(device)
         else:
             model = TAGClassifier(in_dim, hid_dim, out_dim).to(device)
         logger.info(model)
@@ -144,6 +145,64 @@ class UnircaLab:
 
         return output, labels
 
+    def inference(self, model, dataset, task, out_file=None, save_file=None):
+        from rcabench_platform.v2.algorithms.spec import AlgorithmAnswer
+        from src.utils.logger import logger
+
+        model.eval()
+        dataloader = DataLoader(
+            dataset, batch_size=len(dataset) + 10, collate_fn=self.collate
+        )
+        device = "cpu"
+        results = []
+
+        # 创建实例ID到名称的反向映射
+        id_to_name = {v: k for k, v in self.ins_dict.items()}
+
+        for batched_graph, labels in dataloader:
+            batched_graph = batched_graph.to(device)
+            output = model(batched_graph, batched_graph.ndata["attr"].float())
+
+            if task == "instance":
+                k = 5 if output.shape[-1] >= 5 else output.shape[-1]
+                _, indices = torch.topk(output, k=k, dim=1, largest=True, sorted=True)
+                predicted_services = indices.detach().numpy()[0]  # 获取预测的服务IDs
+
+                # 获取实例并生成结果
+                instances = []
+                for service_id in predicted_services:
+                    if service_id in self.topoinfo:
+                        for instance_id in self.topoinfo[service_id]:
+                            instances.append(instance_id)
+                            if len(instances) >= 5:  # 最多返回5个实例
+                                break
+                    if len(instances) >= 5:
+                        break
+
+                # 构建AlgorithmAnswer结果
+                for rank, instance_id in enumerate(instances, 1):
+                    # 将实例ID转换为实例名称
+                    instance_name = id_to_name.get(
+                        instance_id, f"unknown_{instance_id}"
+                    )
+                    results.append(
+                        AlgorithmAnswer(
+                            level="service",
+                            name=instance_name,  # 使用实例名称而不是ID
+                            rank=rank,
+                        )
+                    )
+            else:
+                raise Exception("Unknow task")
+
+        # 打印返回结果
+        logger.info("返回的AlgorithmAnswer列表:")
+        for idx, answer in enumerate(results):
+            logger.info(
+                f"  {idx+1}. level: {answer.level}, name: {answer.name}, rank: {answer.rank}"
+            )
+
+        return results
 
     def test_instance_local(self, s_preds, max_num=2):
         """
@@ -189,7 +248,6 @@ class UnircaLab:
             index=test_cases.index,
         )
 
-
     def do_lab(self, lab_id):
         save_dir = os.path.join(self.config["save_dir"], str(lab_id))
         if not os.path.exists(save_dir):
@@ -209,9 +267,9 @@ class UnircaLab:
                 aug_size=self.config["aug_size"],
                 shuffle=True,
             ),
-            "N_S"
+            "N_S",
         )
-        
+
         logger.info("instance")
         _, _ = self.testv2(
             model_ts,

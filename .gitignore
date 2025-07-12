@@ -6,3 +6,4 @@ temp_logs/
 cache/
 *.pkl
 *.txt
+*.parquet

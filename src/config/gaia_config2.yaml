@@ -47,7 +47,7 @@ he_dgl:
     ts-admin-basic-info-service ts-admin-route-service ts-train-service
   run_table: gt.csv
   save_dir: dgl/stratification_10
-  save_model: false
+  save_model: true
   seed: 2
   text_path: parse/stratification_texts.pkl
   weight_decay: 0.0001

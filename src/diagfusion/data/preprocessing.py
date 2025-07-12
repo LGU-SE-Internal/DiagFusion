@@ -16,8 +16,6 @@ import time
 from src.utils.logger import logger
 
 
-
-
 def run_parse(config, labels):
     trace = None
     metric = None
@@ -34,6 +32,7 @@ def run_parse(config, labels):
         trace, metric, logs, labels, config["save_path"], config["nodes"]
     )
 
+
 def run_fasttext(config, labels):
     # event embedding流程；基于数据增强
     start_ts = time.time()
@@ -41,6 +40,7 @@ def run_fasttext(config, labels):
     lab2.do_lab()
     end_ts = time.time()
     logger.info("fasttext time used:", end_ts - start_ts, "s")
+
 
 def run_sentence_embedding(config):
     sentence_embedding(
@@ -50,6 +50,7 @@ def run_sentence_embedding(config):
         config["save_path"],
         config["K_S"],
     )
+
 
 class RawDataProcess:
     """用来处理原始数据的类
@@ -65,11 +66,15 @@ class RawDataProcess:
     def __init__(self, config):
         self.config = config
 
-    def process(self):
+    def process(self, inference=False):
         """用来获取并保存中间数据
+        参数
+        ----------
+        inference: bool, 是否为推理模式
+
         输入：
             sentence_embedding.pkl
-            demo.csv
+            demo.csv 或 inference.csv(推理模式)
         输出：
             训练集：
                 train_Xs.pkl
@@ -80,12 +85,18 @@ class RawDataProcess:
             拓扑：
                 topology.pkl
         """
-        run_table = pd.read_csv(
-            os.path.join(self.config["data_dir"], self.config["run_table"]), index_col=0
-        )
+        if inference:
+            # 推理模式下从固定路径读取
+            run_table = pd.read_csv("src/data/inference/gt.csv", index_col=0)
+        else:
+            # 训练模式下从配置路径读取
+            run_table = pd.read_csv(
+                os.path.join(self.config["data_dir"], self.config["run_table"]),
+                index_col=0,
+            )
         Xs = U.load_info(os.path.join(self.config["data_dir"], self.config["Xs"]))
         Xs = np.array(Xs)
-        
+
         # 只处理service标签
         service_labels = self.get_label("service", run_table)
 
@@ -137,18 +148,15 @@ class RawDataProcess:
         if dataset == "rcabench":
             # 从json文件中读取拓扑结构
             topology_path = "/home/nn/workspace/DiagFusion/src/data/rcabench/demo/demo2/anomalies/instance_topology.json"
-            with open(topology_path, 'r') as f:
+            with open(topology_path, "r") as f:
                 topology_data = json.load(f)
-                
-            topology = (
-                topology_data["source_nodes"],
-                topology_data["target_nodes"]
-            )
+
+            topology = (topology_data["source_nodes"], topology_data["target_nodes"])
         else:
             raise Exception()
-            
+
         return topology
-    
+
 
 class FastTextLab:
     def __init__(self, config, cases, split=True):
@@ -226,7 +234,8 @@ class FastTextLab:
                     )[0][-1]
                     chosen_text_splits[event_id] = nearest_event
                 da_train_data.append(
-                    " ".join(chosen_text_splits) + f"\t__label__{self.node_labels[node]}"
+                    " ".join(chosen_text_splits)
+                    + f"\t__label__{self.node_labels[node]}"
                 )
                 sample_count += 1
 
@@ -259,16 +268,12 @@ class FastTextLab:
                         text = text.replace("(", "").replace(")", "")
                         if fillna and len(text) == 0:
                             text = "None"
-                        f.write(
-                            f"{text}\t__label__{self.node_labels[node_info[0]]}\n"
-                        )
+                        f.write(f"{text}\t__label__{self.node_labels[node_info[0]]}\n")
                     elif isinstance(text, list):
                         text = " ".join(text)
                         if fillna and len(text) == 0:
                             text = "None"
-                        f.write(
-                            f"{text}\t__label__{self.node_labels[node_info[0]]}\n"
-                        )
+                        f.write(f"{text}\t__label__{self.node_labels[node_info[0]]}\n")
                     else:
                         raise Exception("type error")
         return
@@ -282,14 +287,14 @@ class FastTextLab:
 
 
 def metric_trace_log_parse(trace, metric, logs, labels, save_path, nodes):
-    if not metric is None: # 去除np.inf数值的指标
+    if not metric is None:  # 去除np.inf数值的指标
         for k, v in metric.items():
             metric[k] = [x for x in v if not math.isinf(x[3])]
 
     if not logs is None:
         logs = list(logs)
         log = {x: [] for x in labels.index}
-        if labels.index[-1]+1 == len(log):
+        if labels.index[-1] + 1 == len(log):
             for k, v in log.items():
                 log[k] = logs[int(k)]
         else:
@@ -299,8 +304,8 @@ def metric_trace_log_parse(trace, metric, logs, labels, save_path, nodes):
                 count += 1
 
     service_name = nodes.split()
-    anomaly_service = list(labels['instance'])
-    anomaly_type = list(labels['anomaly_type'])
+    anomaly_service = list(labels["instance"])
+    anomaly_type = list(labels["anomaly_type"])
 
     demo_metric = {x: {} for x in labels.index}
     k = 0
@@ -308,29 +313,43 @@ def metric_trace_log_parse(trace, metric, logs, labels, save_path, nodes):
         anomaly_service_name = anomaly_service[k]
         anomaly_service_type = anomaly_type[k]
         k += 1
-        inner_dict_key = [(x, anomaly_service_type) if x == anomaly_service_name else (x, "[normal]") for x in
-                          service_name]
+        inner_dict_key = [
+            (x, anomaly_service_type) if x == anomaly_service_name else (x, "[normal]")
+            for x in service_name
+        ]
         # 指标
         if not metric is None:
-            demo_metric[case_id] = {x: [[y[0], "{}_{}_{}".format(y[1], y[2], "+" if y[3] > 0 else "-")] for y in metric[str(case_id)] if
-                                  y[1] == x[0]] for x in inner_dict_key}
+            demo_metric[case_id] = {
+                x: [
+                    [y[0], "{}_{}_{}".format(y[1], y[2], "+" if y[3] > 0 else "-")]
+                    for y in metric[str(case_id)]
+                    if y[1] == x[0]
+                ]
+                for x in inner_dict_key
+            }
         else:
-            demo_metric[case_id] = {x : [] for x in inner_dict_key}
+            demo_metric[case_id] = {x: [] for x in inner_dict_key}
         # 调用链
         if not trace is None:
             for inner_key in inner_dict_key:
                 demo_metric[case_id][inner_key].extend(
-                    [[y[0], "{}_{}".format(y[1], y[2])] for y in trace[str(case_id)] 
-                     if y[1] == inner_key[0] or y[2] == inner_key[0]])
+                    [
+                        [y[0], "{}_{}".format(y[1], y[2])]
+                        for y in trace[str(case_id)]
+                        if y[1] == inner_key[0] or y[2] == inner_key[0]
+                    ]
+                )
         # 日志
         if not logs is None:
             for inner_key in inner_dict_key:
-                demo_metric[case_id][inner_key].extend([[y[0], y[2]] for y in log[case_id] if y[1] == inner_key[0]])
+                demo_metric[case_id][inner_key].extend(
+                    [[y[0], y[2]] for y in log[case_id] if y[1] == inner_key[0]]
+                )
         for inner_key in inner_dict_key:
             temp = demo_metric[case_id][inner_key]
             sort_list = sorted(temp, key=lambda x: x[0])
             temp_list = [x[1] for x in sort_list]
-            demo_metric[case_id][inner_key] = ' '.join(temp_list)
+            demo_metric[case_id][inner_key] = " ".join(temp_list)
 
     pf.save(save_path, demo_metric)
 
