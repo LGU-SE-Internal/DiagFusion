@@ -7,3 +7,4 @@ cache/
 *.pkl
 *.txt
 *.parquet
+*.finished

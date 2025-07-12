@@ -38,14 +38,14 @@ class diagfusion(Algorithm):
         cache_dir = "./cache"
         data_paths = args.input_folder
         # =========================================
-        # 处理指标数据
+        # 处理 groundtruth 数据
         preprocess_injection_inference(data_paths)
 
         # =========================================
 
         # 保存相应的数据到对应目录
         # 输入：
-        #     sentence_embedding.pkl
+        #     sentence_embedding.pkl 训练过程中得到的
         #     demo.csv
         he_dgl_config = deal_config(config, "he_dgl")
         RawDataProcess(he_dgl_config).process(inference=True)
