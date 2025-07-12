@@ -369,7 +369,7 @@ def sentence_embedding(file_dict, train_path, test_path, save_path, service_num)
     )  # 将tf-idf矩阵抽取出来，元素a[i][j]表示j词在i类文本中的tf-idf权重
     weight_test = tfidf_test.toarray()
 
-    word = vectorizer.get_feature_names()  # 获取词袋模型中的所有词语
+    word = vectorizer.get_feature_names_out()  # 获取词袋模型中的所有词语
     word_dict = {word[i]: i for i in range(len(word))}
     logger.info("len vectorizer words:", len(word_dict))
     logger.info("len fasttext words:", len(data_dict))

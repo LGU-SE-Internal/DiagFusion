@@ -81,7 +81,7 @@ def process_parquet_files(data_paths: list[Path]):
             continue
     
     # 设置输出路径并确保目录存在
-    output_file = Path('../data/rcabench/demo/demo2/anomalies/demo_metric.json')
+    output_file = Path('src/data/rcabench/demo/demo2/anomalies/demo_metric.json')
     output_file.parent.mkdir(parents=True, exist_ok=True)
     
     with open(output_file, 'w') as f:

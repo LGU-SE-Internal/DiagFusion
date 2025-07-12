@@ -239,7 +239,7 @@ def preprocess_logs(
     drain.save_cache()
             
     # 保存为npy文件
-    save_path = Path("../data/rcabench/demo/demo2/anomalies/stratification_logs.npy").resolve()
+    save_path = Path("src/data/rcabench/demo/demo2/anomalies/stratification_logs.npy").resolve()
     # 确保目录存在
     save_path.parent.mkdir(parents=True, exist_ok=True)
     np.save(str(save_path), np.array(log_sequences, dtype=object))

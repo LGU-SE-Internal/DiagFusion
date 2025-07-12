@@ -14,7 +14,7 @@ from src.utils.logger import logger
 
 def preprocess_injection(
         data_paths: list[Path],
-        output_path: str = "../data/rcabench/demo/demo2/gt.csv",
+        output_path: str = "src/data/rcabench/demo/demo2/gt.csv",
     ) -> pd.DataFrame:
         """从injection文件中提取信息生成ground truth数据
 

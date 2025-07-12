@@ -28,7 +28,7 @@ def update_config_nodes():
     nodes_str = " ".join(instances)
     
     # 读取yaml配置文件
-    config_path = Path("../config/gaia_config2.yaml")
+    config_path = Path("src/config/gaia_config2.yaml")
     # 确保配置文件所在目录存在
     config_path.parent.mkdir(parents=True, exist_ok=True)
     with open(config_path, 'r') as f:

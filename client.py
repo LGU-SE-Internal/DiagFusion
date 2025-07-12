@@ -4,8 +4,15 @@ from src.exp.config import deal_config, get_config
 import pandas as pd
 from src.diagfusion.data.preprocessing import run_parse, run_fasttext, run_sentence_embedding
 from src.utils.logger import logger
+import sys
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "src/preprocess"))
+from src.preprocess.get_data import main as get_data_main
 
 if __name__ == "__main__":
+    logger.info("[Data Preprocess]")
+    logger.info("[Get Data]")
+    get_data_main()
+    # 1. 处理数据
     logger.info("[diagfusion]")
     # diagfusion
     config = get_config()
