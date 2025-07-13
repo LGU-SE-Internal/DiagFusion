@@ -10,8 +10,10 @@ fasttext:
   epoch: 5
   fasttext_dir: fasttext
   minCount: 1
-  nodes: ts-order-service ts-order-other-service ts-station-food-service ts-price-service
-    ts-admin-basic-info-service ts-admin-route-service ts-train-service
+  nodes: ts-food-service ts-route-service ts-seat-service ts-basic-service ts-consign-price-service
+    ts-rebook-service ts-order-service ts-ui-dashboard ts-travel-service ts-security-service
+    ts-price-service ts-route-plan-service ts-travel2-service ts-admin-route-service
+    ts-inside-payment-service ts-auth-service
   sample_count: 1000
   save_path: fasttext/event_embedding.pkl
   supervised: true
@@ -32,7 +34,7 @@ feature_list:
   6: BOW_NGram_X
 feature_path: data/rcabench/feature
 he_dgl:
-  N_S: 7
+  N_S: 16
   TOPK_SA: 10
   Xs: sentence_embedding.pkl
   aug: false
@@ -43,8 +45,10 @@ he_dgl:
   epoch: 6000
   heterogeneous: false
   lr: 0.001
-  nodes: ts-order-service ts-order-other-service ts-station-food-service ts-price-service
-    ts-admin-basic-info-service ts-admin-route-service ts-train-service
+  nodes: ts-food-service ts-route-service ts-seat-service ts-basic-service ts-consign-price-service
+    ts-rebook-service ts-order-service ts-ui-dashboard ts-travel-service ts-security-service
+    ts-price-service ts-route-plan-service ts-travel2-service ts-admin-route-service
+    ts-inside-payment-service ts-auth-service
   run_table: gt.csv
   save_dir: dgl/stratification_10
   save_model: true
@@ -59,14 +63,16 @@ metric_path: data/rcabench/demo/metric
 parse:
   log_path: anomalies/stratification_logs.npy
   metric_path: anomalies/demo_metric.json
-  nodes: ts-order-service ts-order-other-service ts-station-food-service ts-price-service
-    ts-admin-basic-info-service ts-admin-route-service ts-train-service
+  nodes: ts-food-service ts-route-service ts-seat-service ts-basic-service ts-consign-price-service
+    ts-rebook-service ts-order-service ts-ui-dashboard ts-travel-service ts-security-service
+    ts-price-service ts-route-plan-service ts-travel2-service ts-admin-route-service
+    ts-inside-payment-service ts-auth-service
   parse_dir: parse
   save_path: parse/stratification_texts.pkl
   trace_path: anomalies/demo_trace.json
 result_path: result/rcabench/analysis
 sentence_embedding:
-  K_S: 7
+  K_S: 16
   save_path: sentence_embedding.pkl
   source_path: fasttext/event_embedding.pkl
   test_path: fasttext/temp/test.txt
