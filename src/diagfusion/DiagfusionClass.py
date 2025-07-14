@@ -50,8 +50,10 @@ class diagfusion(Algorithm):
         he_dgl_config = deal_config(config, "he_dgl")
         RawDataProcess(he_dgl_config).process(inference=True)
 
-        # 模型文件路径
-        model_path = "/home/nn/workspace/DiagFusion/src/data/rcabench/demo/demo2/dgl/stratification_10/9/service_model.pt"
+        # 从环境变量获取模型文件路径
+        model_path = os.getenv("CHECKPOINT_PATH")
+        if model_path is None:
+            raise ValueError("未设置CHECKPOINT_PATH环境变量")
 
         # 加载模型
         model_ts = torch.load(model_path)

@@ -24,19 +24,14 @@ D1 contains two datasets: MicroSS and Companion Data. We use MicroSS, for it pro
 We provide a demo. Please run:
 ```
 python main.py --config gaia_config.yaml
-./main.py eval single diagfusion rcabench_with_issues ts0-ts-food-service-cpu-exhaustion-mw5lzv
+./main.py eval single diagfusion rcabench_filtered ts3-ts-travel-service-response-delay-s4plkv
+./main.py eval batch -d rcabench_filtered -a diagfusion --clear
 ```
 
-## Parameter Description in the Demo
-### fastText \& Instance Embedding
-* `vector_dim`: The dimension of event embedding vectors. (default: 100)
-* `sample_count`: The number of samples per type after data augmentation. (default: 1000)
-* `edit_count`: The number of events modified per sample during data augmentation. (default: 1)
-* `minCount`: The minimum number of occurrences of the event (events that occur less than this number are ignored). (default: 1)
-### DGL
-* `epoch`: Training rounds. (default: 6000)
-* `batch_size`: The number of samples contained in a batch of data. (default: 1000)
-* `win_size`: The length of the judgment window for ending training early. (default: 10)
-* `win_threshole`: The thresh for ending training early. (default: 0.0001)
-* `lr`: The learning rate. (default: 0.001)
+```bash
+INPUT_PATH=/mnt/jfs/rcabench_dataset/ts0-ts-food-delivery-service-exception-f5xmtg  \
+OUTPUT_PATH=/mnt/jfs/rcabench_dataset/ts0-ts-food-delivery-service-exception-f5xmtg \
+CHECKPOINT_PATH=/home/nn/workspace/DiagFusion/src/data/rcabench/demo/demo2/dgl/stratification_10/9/service_model.pt \
+./entrypoint.sh
+```
 
