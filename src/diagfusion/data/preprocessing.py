@@ -156,6 +156,61 @@ class RawDataProcess:
             raise Exception()
 
         return topology
+    
+
+class InferenceDataProcess:
+    """用来处理原始数据的类，仅用于推理
+    参数
+    ----------
+    config: dict
+        配置参数
+        Xs: 特征向量矩阵
+        data_dir: 数据和结果存放路径
+        dataset: 数据集名称 可选['21aiops', 'gaia']
+    """
+
+    def __init__(self, config):
+        self.config = config
+
+    def process(self):
+        """用来获取并保存中间数据，仅用于推理场景
+
+        输入：
+            sentence_embedding.pkl
+        输出：
+            测试集：
+                test_Xs.pkl
+            拓扑：
+                topology.pkl
+        """        
+        # 加载特征向量
+        Xs = U.load_info(os.path.join(self.config["data_dir"], self.config["Xs"]))
+        Xs = np.array(Xs)
+
+        save_dir = self.config["save_dir"]
+        
+        # 直接保存所有特征向量作为测试数据
+        U.save_info(os.path.join(save_dir, "test_Xs.pkl"), Xs)
+        
+        # 保存拓扑
+        topology = self.get_topology()
+        U.save_info(os.path.join(save_dir, "topology.pkl"), topology)
+
+    def get_topology(self):
+        """process() 中调用，用来获取topology"""
+        dataset = self.config["dataset"]
+        # 同质图
+        if dataset == "rcabench":
+            # 从json文件中读取拓扑结构
+            topology_path = "/home/nn/workspace/DiagFusion/src/data/rcabench/demo/demo2/anomalies/instance_topology.json"
+            with open(topology_path, "r") as f:
+                topology_data = json.load(f)
+
+            topology = (topology_data["source_nodes"], topology_data["target_nodes"])
+        else:
+            raise Exception()
+
+        return topology
 
 
 class FastTextLab:

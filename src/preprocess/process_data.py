@@ -86,67 +86,6 @@ def preprocess_injection(
     return df
 
 
-def preprocess_injection_inference(
-    data_paths: Path,
-    output_path: str = "src/data/inference/gt.csv",
-) -> pd.DataFrame:
-    """从injection文件中提取信息生成ground truth数据
-
-    Args:
-        data_paths: 数据文件路径列表
-        output_path: 输出CSV文件路径
-
-    Returns:
-        包含ground truth信息的DataFrame
-    """
-    # 确保输出目录存在
-    output_path = Path(output_path)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-
-    records = []
-    injection_path = data_paths / "injection.json"
-
-    # 读取injection文件
-    with open(injection_path, "r") as f:
-        injection = json.load(f)
-
-    service = (
-        injection["ground_truth"]["service"][1]
-        if len(injection["ground_truth"]["service"]) > 1
-        else injection["ground_truth"]["service"][0]
-    )
-    # service = injection["ground_truth"]["service"][0]
-    instance = service
-
-    # 提取时间信息
-    start_time = pd.to_datetime(injection["start_time"])
-    end_time = pd.to_datetime(injection["end_time"])
-
-    # 构建记录
-    record = {
-        "index": 0,
-        "datetime": start_time.date(),
-        "service": service,
-        "instance": instance,
-        "anomaly_type": str(injection["fault_type"]),
-        "st_time": start_time,
-        "ed_time": end_time,
-        "duration": injection["pre_duration"],
-    }
-    records.append(record)
-
-    # 创建DataFrame并保存
-    df = pd.DataFrame(records)
-
-    # 添加data_type列,全部设为test
-    df["data_type"] = "test"
-
-    df.to_csv(output_path, index=False)
-    logger.success(f"Ground truth数据已保存到: {output_path}")
-
-    return df
-
-
 def process_data(
     data_paths: list[Path],
     config: Optional[dict] = None,

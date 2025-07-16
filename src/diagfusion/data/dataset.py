@@ -117,3 +117,46 @@ class UnircaDataset:
         aug_Xs = torch.stack(aug_Xs, 0)
         aug_ys = tensor(aug_ys)
         return aug_Xs, aug_ys
+    
+
+class InferenceDataset:
+    """
+    参数
+    ----------
+    dataset_path: str
+        数据存放位置。
+        举例: 'train_Xs.pkl' （67 * 14 * 40）（图数 * 节点数 * 节点向量维数）
+    topology: str
+        图的拓扑结构存放位置
+        举例：'topology.pkl'
+    """
+
+    def __init__(self, dataset_path, topology):
+        self.dataset_path = dataset_path
+        self.topology = topology
+        self.graphs = []
+        self.load()
+
+    def __getitem__(self, idx):
+        return self.graphs[idx]
+
+    def __len__(self):
+        return len(self.graphs)
+
+    def load(self):
+        """__init__()中使用，作用是装载self.graphs"""
+        Xs = tensor(U.load_info(self.dataset_path))
+        topology = U.load_info(self.topology)
+
+        for X in Xs:
+            g = dgl.graph(topology)  # 同质图
+            # 若有0入度节点，给这些节点加自环
+            in_degrees = g.in_degrees()
+            zero_indegree_nodes = [
+                i for i in range(len(in_degrees)) if in_degrees[i].item() == 0
+            ]
+            for node in zero_indegree_nodes:
+                g.add_edges(node, node)
+
+            g.ndata["attr"] = X
+            self.graphs.append(g)

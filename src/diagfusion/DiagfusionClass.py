@@ -8,10 +8,9 @@ from rcabench_platform.v2.algorithms.spec import (
     AlgorithmAnswer,
 )
 from src.utils.logger import logger
-from src.preprocess.process_data import preprocess_injection_inference
-from src.diagfusion.data.preprocessing import RawDataProcess
+from src.diagfusion.data.preprocessing import InferenceDataProcess
 from src.exp.config import deal_config
-from src.diagfusion.data.dataset import UnircaDataset
+from src.diagfusion.data.dataset import InferenceDataset
 from src.exp.controller import UnircaLab
 
 
@@ -37,18 +36,12 @@ class diagfusion(Algorithm):
         # 预处理日志数据
         cache_dir = "./cache"
         data_paths = args.input_folder
-        # =========================================
-        # 处理 groundtruth 数据
-        preprocess_injection_inference(data_paths)
-
-        # =========================================
 
         # 保存相应的数据到对应目录
         # 输入：
-        #     sentence_embedding.pkl 训练过程中得到的
-        #     demo.csv
+        #     sentence_embedding.pkl 
         he_dgl_config = deal_config(config, "he_dgl")
-        RawDataProcess(he_dgl_config).process(inference=True)
+        InferenceDataProcess(he_dgl_config).process()
 
         # 从环境变量获取模型文件路径
         model_path = os.getenv("CHECKPOINT_PATH")
@@ -69,9 +62,8 @@ class diagfusion(Algorithm):
         # inference函数现在直接返回list[AlgorithmAnswer]
         results = lab.inference(
             model_ts,
-            UnircaDataset(
+            InferenceDataset(
                 os.path.join(save_dir, "test_Xs.pkl"),
-                os.path.join(save_dir, "test_ys_service.pkl"),
                 os.path.join(save_dir, "topology.pkl"),
             ),
             "instance",

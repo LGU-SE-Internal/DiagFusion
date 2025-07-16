@@ -149,9 +149,15 @@ class UnircaLab:
         from rcabench_platform.v2.algorithms.spec import AlgorithmAnswer
         from src.utils.logger import logger
 
+        # 为推理定义简单的collate函数
+        def inference_collate(samples):
+            # samples是图对象列表，不是元组
+            batched_graph = dgl.batch(samples)
+            return batched_graph
+
         model.eval()
         dataloader = DataLoader(
-            dataset, batch_size=len(dataset) + 10, collate_fn=self.collate
+            dataset, batch_size=len(dataset) + 10, collate_fn=inference_collate
         )
         device = "cpu"
         results = []
@@ -159,7 +165,7 @@ class UnircaLab:
         # 创建实例ID到名称的反向映射
         id_to_name = {v: k for k, v in self.ins_dict.items()}
 
-        for batched_graph, labels in dataloader:
+        for batched_graph in dataloader:
             batched_graph = batched_graph.to(device)
             output = model(batched_graph, batched_graph.ndata["attr"].float())
 
