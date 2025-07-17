@@ -10,14 +10,13 @@ from .dataset import RCABenchDataset
 from src.utils.logger import logger
 
 
-
 def derive_filename(data_pack: Path) -> dict:
     """
     从数据包路径派生相关文件路径
-    
+
     Args:
         data_pack: 数据包路径
-        
+
     Returns:
         包含相关文件路径的字典
     """
@@ -51,7 +50,6 @@ class TemplateMiner:
     def add_log_message(self, line: str) -> dict:
         template = " ".join([word for word in line.split() if not word.isdigit()])
         return {"template_mined": template or "default_template"}
-
 
 
 class DrainProcesser:
@@ -172,46 +170,43 @@ class LogDataset(RCABenchDataset):
         return final_sequence, labels
 
 
-
 def preprocess_logs(
     data_paths: list[Path],
-    cache_dir: str = "./cache", 
+    cache_dir: str = "./cache",
     max_workers: Optional[int] = None,
 ) -> list[pd.DataFrame]:
     """预处理日志数据的主函数
-    
+
     Args:
         data_paths: 数据文件路径列表
         cache_dir: 缓存目录
         max_workers: 最大并行工作进程数
-        
+
     Returns:
         处理后的DataFrame列表
     """
     # 初始化处理器
     drain = DrainProcesser(
-        "dataset/drain3/drain.ini",
-        "data/gaia/drain.bin", 
-        f"{cache_dir}/drain"
+        "dataset/drain3/drain.ini", "data/gaia/drain.bin", f"{cache_dir}/drain"
     )
-    
+
     # 存储每个data_pack的日志序列
     log_sequences = []
-    
+
     for data_pack in data_paths:
         # 获取相关文件路径
         fs = derive_filename(data_pack)
-        
+
         # 检查必要文件是否存在
         if "abnormal_logs" not in fs or not os.path.exists(fs["abnormal_logs"]):
             raise FileNotFoundError(f"Abnormal log file not found for {data_pack.name}")
         if "injection" not in fs or not os.path.exists(fs["injection"]):
             raise FileNotFoundError(f"Injection file not found for {data_pack.name}")
-        
+
         # 读取injection文件
-        with open(fs["injection"], 'r') as f:
+        with open(fs["injection"], "r") as f:
             injection = json.load(f)
-            
+
         # 没找到 groundtruth 字段，跳过
         if "ground_truth" not in injection:
             continue
@@ -219,34 +214,92 @@ def preprocess_logs(
         # 读取并预处理数据
         df = pd.read_parquet(fs["abnormal_logs"])
         df = df[df["service_name"] != "ts-ui-dashboard"].sort_values(by="time")
-        
+
         # 只取前20条日志
         df = df.head(20)
-        
+
         # 时间转换为毫秒级时间戳
         df["time"] = pd.to_datetime(df["time"], unit="s").astype(np.int64) // 10**6
-        
+
         # 提取日志模板并计算模板ID
         df["template"] = df["message"].apply(drain)
         # df["template_id"] = df["template"].apply(lambda x: hex(abs(hash(x)))[2:10])
         df["template_id"] = df["template"].apply(generate_template_id)
-        
+
         # 将当前data_pack的日志转换为[time, service_name, template_id]格式的列表
         log_sequence = df[["time", "service_name", "template_id"]].values.tolist()
         log_sequences.append(log_sequence)
 
     # 保存缓存
     drain.save_cache()
-            
+
     # 保存为npy文件
-    save_path = Path("src/data/rcabench/demo/demo2/anomalies/stratification_logs.npy").resolve()
+    save_path = Path(
+        "src/data/rcabench/demo/demo2/anomalies/stratification_logs.npy"
+    ).resolve()
     # 确保目录存在
     save_path.parent.mkdir(parents=True, exist_ok=True)
     np.save(str(save_path), np.array(log_sequences, dtype=object))
-    
+
     logger.success(f"已保存日志序列，形状: {len(log_sequences)}")
     logger.info(f"第一个序列示例: {log_sequences[0][:3]}")
-    
+
+    return log_sequences
+
+
+def preprocess_logs_inference(
+    data_path: Path,
+    output_path: Path,
+    cache_dir: str = "./cache",
+) -> list[pd.DataFrame]:
+    """预处理日志数据的主函数
+
+    Args:
+        data_paths: 数据文件路径列表
+        cache_dir: 缓存目录
+        max_workers: 最大并行工作进程数
+
+    Returns:
+        处理后的DataFrame列表
+    """
+    # 初始化处理器
+    drain = DrainProcesser(
+        "dataset/drain3/drain.ini", "data/gaia/drain.bin", f"{cache_dir}/drain"
+    )
+
+    # 存储每个data_pack的日志序列
+    log_sequences = []
+
+    # 读取并预处理数据
+    df = pd.read_parquet(os.path.join(data_path, "abnormal_logs.parquet"))
+    df = df[df["service_name"] != "ts-ui-dashboard"].sort_values(by="time")
+
+    # 只取前20条日志
+    df = df.head(20)
+
+    # 时间转换为毫秒级时间戳
+    df["time"] = pd.to_datetime(df["time"], unit="s").astype(np.int64) // 10**6
+
+    # 提取日志模板并计算模板ID
+    df["template"] = df["message"].apply(drain)
+    # df["template_id"] = df["template"].apply(lambda x: hex(abs(hash(x)))[2:10])
+    df["template_id"] = df["template"].apply(generate_template_id)
+
+    # 将当前data_pack的日志转换为[time, service_name, template_id]格式的列表
+    log_sequence = df[["time", "service_name", "template_id"]].values.tolist()
+    log_sequences.append(log_sequence)
+
+    # 保存缓存
+    drain.save_cache()
+
+    save_path = os.path.join(output_path, "stratification_logs.npy")
+    # 确保目录存在
+    os.makedirs(os.path.dirname(save_path), exist_ok=True)
+    np.save(str(save_path), np.array(log_sequences, dtype=object))
+
+    logger.success(f"已保存日志序列，形状: {len(log_sequences)}")
+    logger.info(f"第一个序列示例: {log_sequences[0][:3]}")
+
     return log_sequences
 
 

@@ -1,3 +1,4 @@
+import os
 import pickle
 from .dataset import RCABenchDataset, derive_filename
 from pathlib import Path
@@ -22,6 +23,23 @@ def save_trace_data(
     output_path.parent.mkdir(parents=True, exist_ok=True)
     # 预处理数据
     trace_dict = preprocess_trace_data(data_paths, cache_dir="./cache")
+
+    # 保存为JSON文件
+    with open(output_path, "w") as f:
+        json.dump(trace_dict, f, indent=4)
+
+    logger.success(f"Trace数据已保存到: {output_path}")
+    logger.info(f"共处理了 {len(trace_dict)} 个case")
+    return trace_dict
+
+
+def save_trace_data_inference(data_path, output_path):
+    """处理并保存trace数据为JSON文件"""
+    # 确保输出目录存在
+    output_path = os.path.join(output_path, "demo_trace.json")
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    # 预处理数据
+    trace_dict = preprocess_trace_data_inference(data_path, cache_dir="./cache")
 
     # 保存为JSON文件
     with open(output_path, "w") as f:
@@ -138,6 +156,66 @@ def preprocess_trace_data(paths: list[Path], cache_dir: str = "./cache") -> dict
         # print(f"已保存批次 {batch_idx} 的中间结果到 {temp_file}")
 
     generate_service_topology(all_traces)
+
+    return processed_dict
+
+
+def preprocess_trace_data_inference(
+    data_path: Path, cache_dir: str = "./cache"
+) -> dict:
+    processed_dict = {}
+    all_traces = []
+    abnormal_trace_df = pd.read_parquet(
+        os.path.join(data_path, "abnormal_traces.parquet")
+    )
+
+    # 转换时间戳
+    abnormal_trace_df["timestamp"] = abnormal_trace_df["time"].apply(
+        lambda x: (
+            int(x.timestamp() * 1000) if hasattr(x, "timestamp") else int(x / 1000)
+        )
+    )
+
+    # 构建调用关系
+    abnormal_trace_df = _build_invoke_links(abnormal_trace_df)
+
+    # 收集trace数据用于生成topology（只保留必要的列以节省内存）
+    all_traces.append(abnormal_trace_df[["service_name", "parent_service"]])
+
+    # 使用 k_sigma 计算异常分数
+    k_sigma = Ksigma()
+    scores = []
+    for name, group in abnormal_trace_df.groupby(["service_name", "parent_service"]):
+        group = group.sort_values("timestamp")
+        if len(group) > 0:
+            is_anomaly, _, score = k_sigma.detection(
+                data=pd.DataFrame(
+                    {
+                        "time": group["timestamp"].values,
+                        "value": group["duration"].values,
+                    }
+                ),
+                column="value",
+                start_ts=group["timestamp"].min(),
+                end_ts=group["timestamp"].max(),
+            )
+            scores.extend([abs(score) if is_anomaly else 0] * len(group))
+        else:
+            scores.extend([0] * len(group))
+
+    abnormal_trace_df["score"] = scores
+
+    # 提取需要的列并转换为列表格式
+    trace_records = abnormal_trace_df[
+        ["timestamp", "parent_service", "service_name", "score"]
+    ].values.tolist()
+
+    # 只保存结果，不保存整个DataFrame
+    if trace_records:
+        processed_dict[str(0)] = trace_records
+        logger.info(f"已处理完成 case {0}，生成 {len(trace_records)} 条记录")
+
+    # 不用生成拓扑图了，应该用训练时生成的
 
     return processed_dict
 

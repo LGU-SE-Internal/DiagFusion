@@ -2,9 +2,19 @@ import json
 import os
 import pandas as pd
 from typing import Optional
-from src.preprocess.process_metric import process_parquet_files
-from src.preprocess.dataset.dataset_log import derive_filename, preprocess_logs
-from src.preprocess.dataset.dataset_trace import save_trace_data
+from src.preprocess.process_metric import (
+    process_parquet_files,
+    process_parquet_files_inference,
+)
+from src.preprocess.dataset.dataset_log import (
+    derive_filename,
+    preprocess_logs,
+    preprocess_logs_inference,
+)
+from src.preprocess.dataset.dataset_trace import (
+    save_trace_data,
+    save_trace_data_inference,
+)
 from pathlib import Path
 import sys
 
@@ -122,3 +132,30 @@ def process_data(
     update_config_nodes()
 
     return trace_dict, processed_logs, injection_df, metric_dict
+
+
+def process_data_inference(
+    data_path: Path,
+    config: Optional[dict] = None,
+    cache_dir: str = "./cache",
+):
+    """
+    处理多模态数据,包括trace、日志、注入信息和指标数据
+
+    Args:
+        data_paths: 数据文件路径列表
+        config: 配置字典,可选
+        cache_dir: 缓存目录路径
+    """
+    output_path = Path("/home/nn/workspace/DiagFusion/src/data/inference")
+
+    # 预处理日志数据
+    processed_logs = preprocess_logs_inference(data_path, output_path, cache_dir)
+
+    # 处理指标数据
+    metric_dict = process_parquet_files_inference(data_path, output_path)
+
+    # 处理trace数据
+    trace_dict = save_trace_data_inference(data_path, output_path)
+
+    # update_config_nodes()
