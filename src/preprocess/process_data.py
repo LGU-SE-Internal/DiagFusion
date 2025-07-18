@@ -2,6 +2,8 @@ import json
 import os
 import pandas as pd
 from typing import Optional
+
+import yaml
 from src.preprocess.process_metric import (
     process_parquet_files,
     process_parquet_files_inference,
@@ -21,6 +23,13 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from preprocess.config import update_config_nodes
 from src.utils.logger import logger
+from src.diagfusion.data.preprocessing import (
+    run_parse,
+    run_fasttext_inference,
+    run_sentence_embedding_inference,
+    run_sentence_embedding,
+)
+from src.exp.config import deal_config, get_config
 
 
 def preprocess_injection(
@@ -136,7 +145,6 @@ def process_data(
 
 def process_data_inference(
     data_path: Path,
-    config: Optional[dict] = None,
     cache_dir: str = "./cache",
 ):
     """
@@ -147,7 +155,9 @@ def process_data_inference(
         config: 配置字典,可选
         cache_dir: 缓存目录路径
     """
-    output_path = Path("/home/nn/workspace/DiagFusion/src/data/inference")
+    output_path = Path(
+        "/home/nn/workspace/DiagFusion/src/data/inference/demo/demo2/anomalies"
+    )
 
     # 预处理日志数据
     processed_logs = preprocess_logs_inference(data_path, output_path, cache_dir)
@@ -158,4 +168,23 @@ def process_data_inference(
     # 处理trace数据
     trace_dict = save_trace_data_inference(data_path, output_path)
 
-    # update_config_nodes()
+    config = yaml.safe_load(
+        open("/home/nn/workspace/DiagFusion/src/config/inference.yaml")
+    )
+
+    labels = pd.read_csv(
+        "/home/nn/workspace/DiagFusion/src/data/inference/demo/demo2/label.csv",
+        index_col=0,
+    )
+
+    logger.info("[parse]")
+    run_parse(deal_config(config, "parse"), labels)
+
+    logger.info("[fasttext]")
+    run_fasttext_inference(deal_config(config, "fasttext"), labels)
+
+    # input:
+    # 训练得到的 fasttext 的 event embedding.pkl
+    # 训练得到的 vectorizer 和 transformer 的 joblib 文件
+    # 推理得到的 test.txt
+    run_sentence_embedding_inference()

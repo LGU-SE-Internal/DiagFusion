@@ -12,6 +12,7 @@ def get_config():
         config = yaml.safe_load(f)
     return config
 
+
 def deal_config(config, key):
     new_config = {}
     for k in config[key].keys():

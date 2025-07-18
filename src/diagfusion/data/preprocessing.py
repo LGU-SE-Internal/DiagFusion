@@ -28,9 +28,28 @@ def run_parse(config, labels):
     if config["trace_path"]:
         with open(config["trace_path"], "r", encoding="utf8") as fp:
             trace = json.load(fp)
-    metric_trace_log_parse(
-        trace, metric, logs, labels, config["save_path"], config["nodes"]
-    )
+    if config["inference"] == False:
+        metric_trace_log_parse(
+            trace, metric, logs, labels, config["save_path"], config["nodes"]
+        )
+    else:
+        metric_trace_log_parse_inference(
+            trace, metric, logs, labels, config["save_path"], config["nodes"]
+        )
+
+
+# def run_parse_inference(data_path):
+#     trace = None
+#     metric = None
+#     logs = None
+#     logs = np.load(
+#         os.path.join(data_path, "stratification_logs.npy"), allow_pickle=True
+#     )
+#     with open(os.path.join(data_path, "demo_metric.json"), "r", encoding="utf8") as fp:
+#         metric = json.load(fp)
+#     with open(os.path.join(data_path, "demo_trace.json"), "r", encoding="utf8") as fp:
+#         trace = json.load(fp)
+#     metric_trace_log_parse_inference(trace, metric, logs, data_path)
 
 
 def run_fasttext(config, labels):
@@ -42,6 +61,10 @@ def run_fasttext(config, labels):
     logger.info("fasttext time used:", end_ts - start_ts, "s")
 
 
+def run_fasttext_inference(config, labels):
+    FastTextLab_inference(config, labels)
+
+
 def run_sentence_embedding(config):
     sentence_embedding(
         config["source_path"],
@@ -49,6 +72,15 @@ def run_sentence_embedding(config):
         config["test_path"],
         config["save_path"],
         config["K_S"],
+    )
+
+
+def run_sentence_embedding_inference():
+    sentence_embedding_inference(
+        "/home/nn/workspace/DiagFusion/src/data/middle/event_embedding.pkl",
+        "/home/nn/workspace/DiagFusion/src/data/inference/demo/demo2/fasttext/temp/test.txt",
+        "/home/nn/workspace/DiagFusion/src/data/inference/demo/demo2/sentence_embedding.pkl",
+        1,
     )
 
 
@@ -156,7 +188,7 @@ class RawDataProcess:
             raise Exception()
 
         return topology
-    
+
 
 class InferenceDataProcess:
     """用来处理原始数据的类，仅用于推理
@@ -182,16 +214,18 @@ class InferenceDataProcess:
                 test_Xs.pkl
             拓扑：
                 topology.pkl
-        """        
+        """
         # 加载特征向量
-        Xs = U.load_info(os.path.join(self.config["data_dir"], self.config["Xs"]))
+        Xs = U.load_info(
+            "/home/nn/workspace/DiagFusion/src/data/inference/demo/demo2/sentence_embedding.pkl"
+        )
         Xs = np.array(Xs)
 
         save_dir = self.config["save_dir"]
-        
+
         # 直接保存所有特征向量作为测试数据
         U.save_info(os.path.join(save_dir, "test_Xs.pkl"), Xs)
-        
+
         # 保存拓扑
         topology = self.get_topology()
         U.save_info(os.path.join(save_dir, "topology.pkl"), topology)
@@ -211,6 +245,54 @@ class InferenceDataProcess:
             raise Exception()
 
         return topology
+
+
+class FastTextLab_inference:
+    def __init__(self, config, cases, split=True):
+        self.config = config
+        self.cases = cases
+        self.nodes = config["nodes"].split()
+        self.node_labels = dict(zip(self.nodes, range(len(self.nodes))))
+        self.train_data, self.test_data = self.prepare_data()
+
+    def prepare_data(self):
+        metric_trace_text_path = self.config["text_path"]
+        temp_data = pf.load(metric_trace_text_path)
+        train = self.cases[self.cases["data_type"] == "train"].index
+        test = self.cases[self.cases["data_type"] == "test"].index
+        total = self.cases.index
+        self.save_to_txt(temp_data, train, self.config["train_path"])
+        logger.info(f"===================\n")
+        self.save_to_txt(temp_data, test, self.config["test_path"])
+        with open(self.config["train_path"], "r") as f:
+            data = f.read().splitlines()
+
+        with open(self.config["train_path"], "r") as f:
+            train_data = f.read().splitlines()
+        with open(self.config["test_path"], "r") as f:
+            test_data = f.read().splitlines()
+        return train_data, test_data
+
+    def save_to_txt(self, data: dict, keys, save_path):
+        fillna = False
+        with open(save_path, "w") as f:
+            for case_id in keys:
+                case_id = case_id if case_id in data.keys() else str(case_id)
+                for node_info in data[case_id]:
+                    text = data[case_id][node_info]
+                    if isinstance(text, str):
+                        text = text.replace("(", "").replace(")", "")
+                        if fillna and len(text) == 0:
+                            text = "None"
+                        f.write(f"{text}\t__label__{self.node_labels[node_info[0]]}\n")
+                    elif isinstance(text, list):
+                        text = " ".join(text)
+                        if fillna and len(text) == 0:
+                            text = "None"
+                        f.write(f"{text}\t__label__{self.node_labels[node_info[0]]}\n")
+                    else:
+                        raise Exception("type error")
+        return
 
 
 class FastTextLab:
@@ -310,6 +392,11 @@ class FastTextLab:
         event_dict = dict()
         for event in model.words:
             event_dict[event] = model[event]
+        # 保存供推理使用
+        pf.save(
+            "/home/nn/workspace/DiagFusion/src/data/middle/event_embedding.pkl",
+            event_dict,
+        )
         return event_dict
 
     def save_to_txt(self, data: dict, keys, save_path):
@@ -409,6 +496,113 @@ def metric_trace_log_parse(trace, metric, logs, labels, save_path, nodes):
     pf.save(save_path, demo_metric)
 
 
+def metric_trace_log_parse_inference(trace, metric, logs, labels, save_path, nodes):
+    if not logs is None:
+        logs = list(logs)
+        log = {x: [] for x in labels.index}
+        if labels.index[-1] + 1 == len(log):
+            for k, v in log.items():
+                log[k] = logs[int(k)]
+        else:
+            count = 0
+            for k, v in log.items():
+                log[k] = logs[count]
+                count += 1
+
+    service_name = nodes.split()
+    anomaly_service = list(labels["instance"])
+    anomaly_type = list(labels["anomaly_type"])
+
+    demo_metric = {x: {} for x in labels.index}
+    k = 0
+    for case_id, v in tqdm(demo_metric.items()):
+        anomaly_service_name = anomaly_service[k]
+        anomaly_service_type = anomaly_type[k]
+        k += 1
+        inner_dict_key = [
+            (x, anomaly_service_type) if x == anomaly_service_name else (x, "[normal]")
+            for x in service_name
+        ]
+        # 指标
+        if not metric is None:
+            demo_metric[case_id] = {
+                x: [
+                    [y[0], "{}_{}_{}".format(y[1], y[2], "+" if y[3] > 0 else "-")]
+                    for y in metric[str(case_id)]
+                ]
+                for x in inner_dict_key
+            }
+        else:
+            demo_metric[case_id] = {x: [] for x in inner_dict_key}
+        # 调用链
+        if not trace is None:
+            for inner_key in inner_dict_key:
+                demo_metric[case_id][inner_key].extend(
+                    [[y[0], "{}_{}".format(y[1], y[2])] for y in trace[str(case_id)]]
+                )
+        # 日志
+        if not logs is None:
+            for inner_key in inner_dict_key:
+                demo_metric[case_id][inner_key].extend(
+                    [[y[0], y[2]] for y in log[case_id]]
+                )
+        for inner_key in inner_dict_key:
+            temp = demo_metric[case_id][inner_key]
+            sort_list = sorted(temp, key=lambda x: x[0])
+            temp_list = [x[1] for x in sort_list]
+            demo_metric[case_id][inner_key] = " ".join(temp_list)
+
+    pf.save(save_path, demo_metric)
+
+
+# def metric_trace_log_parse_inference(trace, metric, logs, save_path):
+#     if not logs is None:
+#         logs = list(logs)
+#         log = {"0": logs[0]}
+
+#     demo_metric = {"0": {}}
+#     for case_id, v in tqdm(demo_metric.items()):
+#         inner_dict_key = [("service", "[normal]")]
+#         # 指标
+#         if not metric is None:
+#             demo_metric[case_id] = {
+#                 x: [
+#                     [y[0], "{}_{}_{}".format(y[1], y[2], "+" if y[3] > 0 else "-")]
+#                     for y in metric[str(case_id)]
+#                     if y[1] == x[0]
+#                 ]
+#                 for x in inner_dict_key
+#             }
+#         else:
+#             demo_metric[case_id] = {x: [] for x in inner_dict_key}
+#         # 调用链
+#         if not trace is None:
+#             for inner_key in inner_dict_key:
+#                 demo_metric[case_id][inner_key].extend(
+#                     [
+#                         [y[0], "{}_{}".format(y[1], y[2])]
+#                         for y in trace[str(case_id)]
+#                         if y[1] == inner_key[0] or y[2] == inner_key[0]
+#                     ]
+#                 )
+#         # 日志
+#         if not logs is None:
+#             for inner_key in inner_dict_key:
+#                 demo_metric[case_id][inner_key].extend(
+#                     [[y[0], y[2]] for y in log[case_id] if y[1] == inner_key[0]]
+#                 )
+#         for inner_key in inner_dict_key:
+#             temp = demo_metric[case_id][inner_key]
+#             sort_list = sorted(temp, key=lambda x: x[0])
+#             temp_list = [x[1] for x in sort_list]
+#             demo_metric[case_id][inner_key] = " ".join(temp_list)
+
+#     logger.info(
+#         f"save demo_metric to {os.path.join(save_path, 'stratification_texts.pkl')}"
+#     )
+#     pf.save(os.path.join(save_path, "stratification_texts.pkl"), demo_metric)
+
+
 def read_text(path):
     text = []
     f = open(path, "r")
@@ -434,6 +628,18 @@ def sentence_embedding(file_dict, train_path, test_path, save_path, service_num)
     # 第一个fit_transform是计算tf-idf，第二个fit_transform是将文本转为词频矩阵
     vec_train = vectorizer.fit_transform(train_text)
     tfidf_train = transformer.fit_transform(vec_train)
+
+    # 保存训练好的vectorizer和transformer模型
+    import joblib
+
+    model_dir = "/home/nn/workspace/DiagFusion/src/data/middle"
+    vectorizer_path = os.path.join(model_dir, "vectorizer.joblib")
+    transformer_path = os.path.join(model_dir, "transformer.joblib")
+    joblib.dump(vectorizer, vectorizer_path)
+    joblib.dump(transformer, transformer_path)
+    logger.info(f"Saved vectorizer model to {vectorizer_path}")
+    logger.info(f"Saved transformer model to {transformer_path}")
+
     # 预测
     vec_test = vectorizer.transform(test_text)
     tfidf_test = transformer.transform(vec_test)
@@ -470,6 +676,46 @@ def sentence_embedding(file_dict, train_path, test_path, save_path, service_num)
         f"{len(train_embedding)} * {len(train_embedding[0])} * {len(train_embedding[0][0])}",
     )
     pf.save(save_path, train_embedding)
+
+
+def sentence_embedding_inference(file_dict, test_path, save_path, service_num):
+    data_dict = pf.load(file_dict)
+
+    test_text = read_text(test_path)
+
+    # 加载预先训练好的vectorizer和transformer模型
+    import joblib
+
+    vectorizer_path = "/home/nn/workspace/DiagFusion/src/data/middle/vectorizer.joblib"
+    transformer_path = (
+        "/home/nn/workspace/DiagFusion/src/data/middle/transformer.joblib"
+    )
+
+    try:
+        vectorizer = joblib.load(vectorizer_path)
+        transformer = joblib.load(transformer_path)
+        logger.info(f"Loaded vectorizer model from {vectorizer_path}")
+        logger.info(f"Loaded transformer model from {transformer_path}")
+    except Exception as e:
+        logger.error(f"Failed to load models: {e}")
+        raise RuntimeError("请先运行训练过程以生成vectorizer和transformer模型")
+
+    # 预测
+    vec_test = vectorizer.transform(test_text)
+    tfidf_test = transformer.transform(vec_test)
+
+    weight_test = tfidf_test.toarray()
+
+    word = vectorizer.get_feature_names_out()  # 获取词袋模型中的所有词语
+    word_dict = {word[i]: i for i in range(len(word))}
+    logger.info("len vectorizer words:", len(word_dict))
+    logger.info("len fasttext words:", len(data_dict))
+
+    test_embedding = tfidf_word_embedding(
+        weight_test, data_dict, test_text, word_dict, service_num
+    )
+
+    pf.save(save_path, test_embedding)
 
 
 def tfidf_word_embedding(weight, data_dict, texts, word_dict, service_num):

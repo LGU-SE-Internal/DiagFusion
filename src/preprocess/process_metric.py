@@ -130,7 +130,9 @@ def process_parquet_files_inference(data_path: Path, output_path: Path):
             case_dict[str(0)] = []
 
         # 添加异常数据
-        case_dict[str(0)].append([int(anomaly_ts), metric_name, float(anomaly_score)])
+        case_dict[str(0)].append(
+            [int(anomaly_ts), "service", metric_name, float(anomaly_score)]
+        )
         logger.info(f"已处理完成 case {0}, 检测到异常，score: {anomaly_score:.4f}")
 
     # 设置输出路径并确保目录存在

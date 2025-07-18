@@ -12,13 +12,7 @@ from src.diagfusion.data.preprocessing import InferenceDataProcess
 from src.exp.config import deal_config
 from src.diagfusion.data.dataset import InferenceDataset
 from src.exp.controller import UnircaLab
-
-
-def platform_get_config():
-    config_path = "./src/config/gaia_config2.yaml"
-    with open(config_path, "r", encoding="utf-8") as f:
-        config = yaml.safe_load(f)
-    return config
+from src.preprocess.process_data import process_data_inference
 
 
 class diagfusion(Algorithm):
@@ -30,16 +24,21 @@ class diagfusion(Algorithm):
         # 输出预测故障服务的排位
         # ==========================================================
         logger.info(f"Processing case: {args.input_folder}")
-        config = platform_get_config()
 
         # 处理数据
         # 预处理日志数据
         cache_dir = "./cache"
         data_paths = args.input_folder
 
+        process_data_inference(data_paths, cache_dir="./cache")
+
+        config = yaml.safe_load(
+            open("/home/nn/workspace/DiagFusion/src/config/gaia_config2.yaml")
+        )
+
         # 保存相应的数据到对应目录
         # 输入：
-        #     sentence_embedding.pkl 
+        #     sentence_embedding.pkl
         he_dgl_config = deal_config(config, "he_dgl")
         InferenceDataProcess(he_dgl_config).process()
 

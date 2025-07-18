@@ -1,7 +1,7 @@
-base_path: src
+base_path: /home/nn/workspace/DiagFusion/src
 dataset: rcabench
-demo_path: data/rcabench/demo
-event_path: data/rcabench/events
+demo_path: data/inference/demo
+event_path: data/inference/events
 exploration_path: exploration/gaia/pics
 fasttext:
   da_method: w2v
@@ -10,10 +10,7 @@ fasttext:
   epoch: 5
   fasttext_dir: fasttext
   minCount: 1
-  nodes: ts-travel2-service ts-consign-service ts-cancel-service ts-station-service
-    ts-travel-service ts-inside-payment-service ts-auth-service ts-train-food-service
-    ts-preserve-service ts-assurance-service ts-travel-plan-service ts-order-service
-    ts-price-service ts-security-service
+  nodes: service
   sample_count: 1000
   save_path: fasttext/event_embedding.pkl
   supervised: true
@@ -32,9 +29,9 @@ feature_list:
   4: TFIDF_BOW_X
   5: TFIDF_NGram_X,
   6: BOW_NGram_X
-feature_path: data/rcabench/feature
+feature_path: data/inference/feature
 he_dgl:
-  N_S: 14
+  N_S: 7
   TOPK_SA: 10
   Xs: sentence_embedding.pkl
   aug: false
@@ -45,10 +42,7 @@ he_dgl:
   epoch: 6000
   heterogeneous: false
   lr: 0.001
-  nodes: ts-travel2-service ts-consign-service ts-cancel-service ts-station-service
-    ts-travel-service ts-inside-payment-service ts-auth-service ts-train-food-service
-    ts-preserve-service ts-assurance-service ts-travel-plan-service ts-order-service
-    ts-price-service ts-security-service
+  nodes: service
   run_table: gt.csv
   save_dir: dgl/stratification_10
   save_model: true
@@ -58,25 +52,22 @@ he_dgl:
   win_size: 10
   win_threshold: 0.0001
 label: demo2
-log_path: data/rcabench/demo/log
-metric_path: data/rcabench/demo/metric
+log_path: data/inference/demo/log
+metric_path: data/inference/demo/metric
 parse:
-  inference: false
   log_path: anomalies/stratification_logs.npy
   metric_path: anomalies/demo_metric.json
-  nodes: ts-travel2-service ts-consign-service ts-cancel-service ts-station-service
-    ts-travel-service ts-inside-payment-service ts-auth-service ts-train-food-service
-    ts-preserve-service ts-assurance-service ts-travel-plan-service ts-order-service
-    ts-price-service ts-security-service
+  nodes: service
   parse_dir: parse
   save_path: parse/stratification_texts.pkl
   trace_path: anomalies/demo_trace.json
-result_path: result/rcabench/analysis
+  inference: true
+result_path: result/inference/analysis
 sentence_embedding:
-  K_S: 14
+  K_S: 7
   save_path: sentence_embedding.pkl
   source_path: fasttext/event_embedding.pkl
   test_path: fasttext/temp/test.txt
   train_path: fasttext/temp/train.txt
-source_data_path: data/rcabench/source_data
-trace_path: data/rcabench/demo/trace
+source_data_path: data/inference/source_data
+trace_path: data/inference/demo/trace
