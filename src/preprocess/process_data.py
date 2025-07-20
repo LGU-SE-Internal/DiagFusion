@@ -155,9 +155,7 @@ def process_data_inference(
         config: 配置字典,可选
         cache_dir: 缓存目录路径
     """
-    output_path = Path(
-        "/home/nn/workspace/DiagFusion/data/inference/demo/demo2/anomalies"
-    )
+    output_path = Path("./data/inference/demo/demo2/anomalies")
 
     # 预处理日志数据
     processed_logs = preprocess_logs_inference(data_path, output_path, cache_dir)
@@ -168,12 +166,10 @@ def process_data_inference(
     # 处理trace数据
     trace_dict = save_trace_data_inference(data_path, output_path)
 
-    config = yaml.safe_load(
-        open("/home/nn/workspace/DiagFusion/src/config/inference.yaml")
-    )
+    config = yaml.safe_load(open("./src/config/inference.yaml"))
 
     labels = pd.read_csv(
-        "/home/nn/workspace/DiagFusion/data/rcabench/demo/demo2/label.csv",
+        "./src/config/label.csv",
         index_col=0,
     )
 

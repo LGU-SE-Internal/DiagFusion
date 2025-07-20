@@ -11,7 +11,7 @@ from src.utils.logger import logger
 from src.diagfusion.data.preprocessing import InferenceDataProcess
 from src.exp.config import deal_config
 from src.diagfusion.data.dataset import InferenceDataset
-from src.exp.controller import UnircaLab
+from src.exp.controller import UnircaLab_inference
 from src.preprocess.process_data import process_data_inference
 
 
@@ -50,18 +50,20 @@ class diagfusion(Algorithm):
 
         logger.info("start inference")
 
-        lab_id = 9
-        save_dir = os.path.join(he_dgl_config["save_dir"], str(lab_id))
+        inference_save_dir = "./data/inference/demo/demo2"
+        save_path = "./data/middle/metadata"
 
         # 创建UnircaLab实例
-        lab = UnircaLab(he_dgl_config)
+        lab = UnircaLab_inference(he_dgl_config)
 
         # inference函数现在直接返回list[AlgorithmAnswer]
+        # 推理的 test_Xs.pkl
+        # 训练的 topology.pkl
         results = lab.inference(
             model_ts,
             InferenceDataset(
-                os.path.join(save_dir, "test_Xs.pkl"),
-                os.path.join(save_dir, "topology.pkl"),
+                os.path.join(inference_save_dir, "test_Xs.pkl"),
+                os.path.join(save_path, "topology.pkl"),
             ),
             "instance",
         )

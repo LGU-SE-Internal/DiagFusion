@@ -77,7 +77,7 @@ def run_sentence_embedding(config):
 
 def run_sentence_embedding_inference():
     sentence_embedding_inference(
-        "./data/middle/event_embedding.pkl",
+        os.path.join(os.getenv("DYNACONF_PATHS__METADATA"), "event_embedding.pkl"),
         "./data/inference/demo/demo2/fasttext/temp/test.txt",
         "./data/inference/demo/demo2/sentence_embedding.pkl",
         1,
@@ -214,39 +214,15 @@ class InferenceDataProcess:
         输出：
             测试集：
                 test_Xs.pkl
-            拓扑：
-                topology.pkl
         """
         # 加载特征向量
         Xs = U.load_info("./data/inference/demo/demo2/sentence_embedding.pkl")
         Xs = np.array(Xs)
 
-        save_dir = self.config["save_dir"]
+        save_dir = "./data/inference/demo/demo2"
 
         # 直接保存所有特征向量作为测试数据
         U.save_info(os.path.join(save_dir, "test_Xs.pkl"), Xs)
-
-        # 保存拓扑
-        topology = self.get_topology()
-        U.save_info(os.path.join(save_dir, "topology.pkl"), topology)
-
-    def get_topology(self):
-        """process() 中调用，用来获取topology"""
-        dataset = self.config["dataset"]
-        # 同质图
-        if dataset == "rcabench":
-            # 从json文件中读取拓扑结构
-            topology_path = (
-                "./data/rcabench/demo/demo2/anomalies/instance_topology.json"
-            )
-            with open(topology_path, "r") as f:
-                topology_data = json.load(f)
-
-            topology = (topology_data["source_nodes"], topology_data["target_nodes"])
-        else:
-            raise Exception()
-
-        return topology
 
 
 class FastTextLab_inference:
@@ -396,9 +372,11 @@ class FastTextLab:
             event_dict[event] = model[event]
         # 保存供推理使用
         # 确保目录存在
-        os.makedirs(os.path.dirname("./data/middle/event_embedding.pkl"), exist_ok=True)
+        os.makedirs(
+            os.path.dirname("./data/middle/metadata/event_embedding.pkl"), exist_ok=True
+        )
         pf.save(
-            "./data/middle/event_embedding.pkl",
+            "./data/middle/metadata/event_embedding.pkl",
             event_dict,
         )
         return event_dict
@@ -636,7 +614,7 @@ def sentence_embedding(file_dict, train_path, test_path, save_path, service_num)
     # 保存训练好的vectorizer和transformer模型
     import joblib
 
-    model_dir = "./data/middle"
+    model_dir = "./data/middle/metadata"
     vectorizer_path = os.path.join(model_dir, "vectorizer.joblib")
     transformer_path = os.path.join(model_dir, "transformer.joblib")
     joblib.dump(vectorizer, vectorizer_path)
@@ -690,8 +668,12 @@ def sentence_embedding_inference(file_dict, test_path, save_path, service_num):
     # 加载预先训练好的vectorizer和transformer模型
     import joblib
 
-    vectorizer_path = "./data/middle/vectorizer.joblib"
-    transformer_path = "./data/middle/transformer.joblib"
+    vectorizer_path = os.path.join(
+        os.getenv("DYNACONF_PATHS__METADATA"), "vectorizer.joblib"
+    )
+    transformer_path = os.path.join(
+        os.getenv("DYNACONF_PATHS__METADATA"), "transformer.joblib"
+    )
 
     try:
         vectorizer = joblib.load(vectorizer_path)

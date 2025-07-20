@@ -31,7 +31,15 @@ python main.py --config gaia_config.yaml
 ```bash
 INPUT_PATH=/mnt/jfs/rcabench_dataset/ts0-ts-admin-travel-service-cpu-exhaustion-wgmf5m  \
 OUTPUT_PATH=/mnt/jfs/rcabench_dataset/ts0-ts-admin-travel-service-cpu-exhaustion-wgmf5m \
-CHECKPOINT_PATH=/home/nn/workspace/DiagFusion/data/rcabench/demo/demo2/dgl/stratification_10/9/service_model.pt \
+CHECKPOINT_PATH=./data/middle/checkpoints/service_model.pt \
+DYNACONF_PATHS__METADATA=./data/middle/metadata \
+DYNACONF_PATHS__CKPT=./data/middle/checkpoints \
 ./entrypoint.sh
 ```
 
+在线
+```bash
+"CHECKPOINT_PATH":"/data/middle/checkpoints/service_model.pt",
+"DYNACONF_PATHS__METADATA":"/data/middle/metadata",
+"DYNACONF_PATHS__CKPT":"/data/middle/checkpoints"
+```

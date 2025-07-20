@@ -290,6 +290,104 @@ class UnircaLab:
             "instance_pred_service.csv",
             "instance_acc_service.csv",
         )
-        # 保存模型
-        if self.config["save_model"]:
-            torch.save(model_ts, os.path.join(save_dir, "service_model.pt"))
+        # # 保存模型
+        # if self.config["save_model"]:
+        os.makedirs("data/middle/checkpoints", exist_ok=True)
+        torch.save(
+            model_ts, os.path.join("data/middle/checkpoints", "service_model.pt")
+        )
+
+
+class UnircaLab_inference:
+    def __init__(self, config):
+        self.config = config
+        instances = config["nodes"].split()
+        self.ins_dict = dict(zip(instances, range(len(instances))))
+        if config["dataset"] == "rcabench":
+            # 从service_instance_mapping.json读取拓扑信息
+            mapping_path = os.path.join(
+                os.getenv("DYNACONF_PATHS__METADATA"), "service_instance_mapping.json"
+            )
+            with open(mapping_path, "r") as f:
+                mapping_data = json.load(f)
+                # 将service_instance_map的键转换为整数
+                self.topoinfo = {
+                    int(k): v for k, v in mapping_data["service_instance_map"].items()
+                }
+        else:
+            raise Exception("Unknow dataset")
+
+    def collate(self, samples):
+        graphs, labels = map(list, zip(*samples))
+        batched_graph = dgl.batch(graphs)
+        batched_labels = torch.tensor(labels)
+        return batched_graph, batched_labels
+
+    def save_result(self, save_path, data):
+        df = pd.DataFrame(data, columns=["top_k", "accuracy"])
+        df.to_csv(save_path, index=False)
+
+    def inference(self, model, dataset, task, out_file=None, save_file=None):
+        from rcabench_platform.v2.algorithms.spec import AlgorithmAnswer
+        from src.utils.logger import logger
+
+        # 为推理定义简单的collate函数
+        def inference_collate(samples):
+            # samples是图对象列表，不是元组
+            batched_graph = dgl.batch(samples)
+            return batched_graph
+
+        model.eval()
+        dataloader = DataLoader(
+            dataset, batch_size=len(dataset) + 10, collate_fn=inference_collate
+        )
+        device = "cpu"
+        results = []
+
+        # 创建实例ID到名称的反向映射
+        id_to_name = {v: k for k, v in self.ins_dict.items()}
+
+        for batched_graph in dataloader:
+            batched_graph = batched_graph.to(device)
+            output = model(batched_graph, batched_graph.ndata["attr"].float())
+
+            if task == "instance":
+                k = 5 if output.shape[-1] >= 5 else output.shape[-1]
+                _, indices = torch.topk(output, k=k, dim=1, largest=True, sorted=True)
+                predicted_services = indices.detach().numpy()[0]  # 获取预测的服务IDs
+
+                # 获取实例并生成结果
+                instances = []
+                for service_id in predicted_services:
+                    if service_id in self.topoinfo:
+                        for instance_id in self.topoinfo[service_id]:
+                            instances.append(instance_id)
+                            if len(instances) >= 5:  # 最多返回5个实例
+                                break
+                    if len(instances) >= 5:
+                        break
+
+                # 构建AlgorithmAnswer结果
+                for rank, instance_id in enumerate(instances, 1):
+                    # 将实例ID转换为实例名称
+                    instance_name = id_to_name.get(
+                        instance_id, f"unknown_{instance_id}"
+                    )
+                    results.append(
+                        AlgorithmAnswer(
+                            level="service",
+                            name=instance_name,  # 使用实例名称而不是ID
+                            rank=rank,
+                        )
+                    )
+            else:
+                raise Exception("Unknow task")
+
+        # 打印返回结果
+        logger.info("返回的AlgorithmAnswer列表:")
+        for idx, answer in enumerate(results):
+            logger.info(
+                f"  {idx+1}. level: {answer.level}, name: {answer.name}, rank: {answer.rank}"
+            )
+
+        return results
