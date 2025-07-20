@@ -32,9 +32,7 @@ class diagfusion(Algorithm):
 
         process_data_inference(data_paths, cache_dir="./cache")
 
-        config = yaml.safe_load(
-            open("/home/nn/workspace/DiagFusion/src/config/gaia_config2.yaml")
-        )
+        config = yaml.safe_load(open("./src/config/inference2.yaml"))
 
         # 保存相应的数据到对应目录
         # 输入：

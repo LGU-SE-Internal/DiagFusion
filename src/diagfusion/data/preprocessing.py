@@ -77,9 +77,9 @@ def run_sentence_embedding(config):
 
 def run_sentence_embedding_inference():
     sentence_embedding_inference(
-        "/home/nn/workspace/DiagFusion/src/data/middle/event_embedding.pkl",
-        "/home/nn/workspace/DiagFusion/src/data/inference/demo/demo2/fasttext/temp/test.txt",
-        "/home/nn/workspace/DiagFusion/src/data/inference/demo/demo2/sentence_embedding.pkl",
+        "./data/middle/event_embedding.pkl",
+        "./data/inference/demo/demo2/fasttext/temp/test.txt",
+        "./data/inference/demo/demo2/sentence_embedding.pkl",
         1,
     )
 
@@ -179,7 +179,9 @@ class RawDataProcess:
         # 同质图
         if dataset == "rcabench":
             # 从json文件中读取拓扑结构
-            topology_path = "/home/nn/workspace/DiagFusion/src/data/rcabench/demo/demo2/anomalies/instance_topology.json"
+            topology_path = (
+                "./data/rcabench/demo/demo2/anomalies/instance_topology.json"
+            )
             with open(topology_path, "r") as f:
                 topology_data = json.load(f)
 
@@ -216,9 +218,7 @@ class InferenceDataProcess:
                 topology.pkl
         """
         # 加载特征向量
-        Xs = U.load_info(
-            "/home/nn/workspace/DiagFusion/src/data/inference/demo/demo2/sentence_embedding.pkl"
-        )
+        Xs = U.load_info("./data/inference/demo/demo2/sentence_embedding.pkl")
         Xs = np.array(Xs)
 
         save_dir = self.config["save_dir"]
@@ -236,7 +236,9 @@ class InferenceDataProcess:
         # 同质图
         if dataset == "rcabench":
             # 从json文件中读取拓扑结构
-            topology_path = "/home/nn/workspace/DiagFusion/src/data/rcabench/demo/demo2/anomalies/instance_topology.json"
+            topology_path = (
+                "./data/rcabench/demo/demo2/anomalies/instance_topology.json"
+            )
             with open(topology_path, "r") as f:
                 topology_data = json.load(f)
 
@@ -393,8 +395,10 @@ class FastTextLab:
         for event in model.words:
             event_dict[event] = model[event]
         # 保存供推理使用
+        # 确保目录存在
+        os.makedirs(os.path.dirname("./data/middle/event_embedding.pkl"), exist_ok=True)
         pf.save(
-            "/home/nn/workspace/DiagFusion/src/data/middle/event_embedding.pkl",
+            "./data/middle/event_embedding.pkl",
             event_dict,
         )
         return event_dict
@@ -632,7 +636,7 @@ def sentence_embedding(file_dict, train_path, test_path, save_path, service_num)
     # 保存训练好的vectorizer和transformer模型
     import joblib
 
-    model_dir = "/home/nn/workspace/DiagFusion/src/data/middle"
+    model_dir = "./data/middle"
     vectorizer_path = os.path.join(model_dir, "vectorizer.joblib")
     transformer_path = os.path.join(model_dir, "transformer.joblib")
     joblib.dump(vectorizer, vectorizer_path)
@@ -686,10 +690,8 @@ def sentence_embedding_inference(file_dict, test_path, save_path, service_num):
     # 加载预先训练好的vectorizer和transformer模型
     import joblib
 
-    vectorizer_path = "/home/nn/workspace/DiagFusion/src/data/middle/vectorizer.joblib"
-    transformer_path = (
-        "/home/nn/workspace/DiagFusion/src/data/middle/transformer.joblib"
-    )
+    vectorizer_path = "./data/middle/vectorizer.joblib"
+    transformer_path = "./data/middle/transformer.joblib"
 
     try:
         vectorizer = joblib.load(vectorizer_path)

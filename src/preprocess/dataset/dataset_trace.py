@@ -15,7 +15,7 @@ import gc
 
 # 使用示例
 def save_trace_data(
-    data_paths, output_path="src/data/rcabench/demo/demo2/anomalies/demo_trace.json"
+    data_paths, output_path="./data/rcabench/demo/demo2/anomalies/demo_trace.json"
 ):
     """处理并保存trace数据为JSON文件"""
     # 确保输出目录存在
@@ -226,7 +226,7 @@ def generate_service_topology(all_traces):
         all_traces_df = pd.concat(all_traces, ignore_index=True)
 
         # 处理 groundtruth
-        gt_path = "src/data/rcabench/demo/demo2/gt.csv"
+        gt_path = "./data/rcabench/demo/demo2/gt.csv"
         gt_df = pd.read_csv(gt_path)
         services = gt_df["service"].unique().tolist()
         # 服务ID到服务名称的映射
@@ -242,9 +242,7 @@ def generate_service_topology(all_traces):
         topology = _generate_topology(all_traces_df, service_to_id)
 
         # 将topology保存到文件
-        topology_path = Path(
-            "src/data/rcabench/demo/demo2/anomalies/trace_topology.json"
-        )
+        topology_path = Path("./data/rcabench/demo/demo2/anomalies/trace_topology.json")
         # 确保目录存在
         topology_path.parent.mkdir(parents=True, exist_ok=True)
         with open(topology_path, "w") as f:
@@ -276,7 +274,7 @@ def _generate_topology(all_traces_df, service_to_id):
         tuple: (source_nodes, target_nodes) 分别表示边的源节点和目标节点列表
     """
     # 从gt.csv中读取服务列表
-    gt_path = "src/data/rcabench/demo/demo2/gt.csv"
+    gt_path = "./data/rcabench/demo/demo2/gt.csv"
     gt_df = pd.read_csv(gt_path)
     target_services = gt_df["service"].unique().tolist()
 
@@ -356,7 +354,7 @@ def service_to_instance(
 
     # 保存映射关系
     mapping_path = Path(
-        "src/data/rcabench/demo/demo2/anomalies/service_instance_mapping.json"
+        "./data/rcabench/demo/demo2/anomalies/service_instance_mapping.json"
     )
     # 确保目录存在
     mapping_path.parent.mkdir(parents=True, exist_ok=True)
@@ -374,7 +372,7 @@ def service_to_instance(
 
     if topology is None:
         # 如果没有传入topology，则从文件读取
-        topology_path = "src/data/rcabench/demo/demo2/anomalies/trace_topology.json"
+        topology_path = "./data/rcabench/demo/demo2/anomalies/trace_topology.json"
         with open(topology_path, "r") as f:
             topology_data = json.load(f)
             topology = (topology_data["source_nodes"], topology_data["target_nodes"])
@@ -400,7 +398,7 @@ def service_to_instance(
 
     # 保存实例级别的拓扑
     instance_topology_path = Path(
-        "src/data/rcabench/demo/demo2/anomalies/instance_topology.json"
+        "./data/rcabench/demo/demo2/anomalies/instance_topology.json"
     )
     # 确保目录存在
     instance_topology_path.parent.mkdir(parents=True, exist_ok=True)

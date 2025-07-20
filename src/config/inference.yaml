@@ -1,8 +1,6 @@
-base_path: /home/nn/workspace/DiagFusion/src
+base_path: /home/nn/workspace/DiagFusion
 dataset: rcabench
 demo_path: data/inference/demo
-event_path: data/inference/events
-exploration_path: exploration/gaia/pics
 fasttext:
   da_method: w2v
   dataset: rcabench
@@ -20,40 +18,7 @@ fasttext:
   train_da_path: fasttext/temp/train_da.txt
   train_path: fasttext/temp/train.txt
   vector_dim: 100
-feature: feature_list[0]
-feature_list:
-  0: TFIDF_X
-  1: BOW_X
-  2: NGram_X
-  3: TFIDF_BOW_NGram_X
-  4: TFIDF_BOW_X
-  5: TFIDF_NGram_X,
-  6: BOW_NGram_X
-feature_path: data/inference/feature
-he_dgl:
-  N_S: 7
-  TOPK_SA: 10
-  Xs: sentence_embedding.pkl
-  aug: false
-  aug_size: 0
-  batch_size: 1000
-  data_dir: ''
-  dataset: rcabench
-  epoch: 6000
-  heterogeneous: false
-  lr: 0.001
-  nodes: service
-  run_table: gt.csv
-  save_dir: dgl/stratification_10
-  save_model: true
-  seed: 2
-  text_path: parse/stratification_texts.pkl
-  weight_decay: 0.0001
-  win_size: 10
-  win_threshold: 0.0001
 label: demo2
-log_path: data/inference/demo/log
-metric_path: data/inference/demo/metric
 parse:
   log_path: anomalies/stratification_logs.npy
   metric_path: anomalies/demo_metric.json
@@ -62,12 +27,4 @@ parse:
   save_path: parse/stratification_texts.pkl
   trace_path: anomalies/demo_trace.json
   inference: true
-result_path: result/inference/analysis
-sentence_embedding:
-  K_S: 7
-  save_path: sentence_embedding.pkl
-  source_path: fasttext/event_embedding.pkl
-  test_path: fasttext/temp/test.txt
-  train_path: fasttext/temp/train.txt
-source_data_path: data/inference/source_data
-trace_path: data/inference/demo/trace
+

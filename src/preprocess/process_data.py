@@ -34,7 +34,7 @@ from src.exp.config import deal_config, get_config
 
 def preprocess_injection(
     data_paths: list[Path],
-    output_path: str = "src/data/rcabench/demo/demo2/gt.csv",
+    output_path: str = "./data/rcabench/demo/demo2/gt.csv",
 ) -> pd.DataFrame:
     """从injection文件中提取信息生成ground truth数据
 
@@ -156,7 +156,7 @@ def process_data_inference(
         cache_dir: 缓存目录路径
     """
     output_path = Path(
-        "/home/nn/workspace/DiagFusion/src/data/inference/demo/demo2/anomalies"
+        "/home/nn/workspace/DiagFusion/data/inference/demo/demo2/anomalies"
     )
 
     # 预处理日志数据
@@ -173,7 +173,7 @@ def process_data_inference(
     )
 
     labels = pd.read_csv(
-        "/home/nn/workspace/DiagFusion/src/data/inference/demo/demo2/label.csv",
+        "/home/nn/workspace/DiagFusion/data/rcabench/demo/demo2/label.csv",
         index_col=0,
     )
 

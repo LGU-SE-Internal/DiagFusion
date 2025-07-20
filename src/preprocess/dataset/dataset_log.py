@@ -235,7 +235,7 @@ def preprocess_logs(
 
     # 保存为npy文件
     save_path = Path(
-        "src/data/rcabench/demo/demo2/anomalies/stratification_logs.npy"
+        "./data/rcabench/demo/demo2/anomalies/stratification_logs.npy"
     ).resolve()
     # 确保目录存在
     save_path.parent.mkdir(parents=True, exist_ok=True)

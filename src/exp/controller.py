@@ -30,7 +30,9 @@ class UnircaLab:
         )
         if config["dataset"] == "rcabench":
             # 从service_instance_mapping.json读取拓扑信息
-            mapping_path = "/home/nn/workspace/DiagFusion/src/data/rcabench/demo/demo2/anomalies/service_instance_mapping.json"
+            mapping_path = (
+                "./data/rcabench/demo/demo2/anomalies/service_instance_mapping.json"
+            )
             with open(mapping_path, "r") as f:
                 mapping_data = json.load(f)
                 # 将service_instance_map的键转换为整数

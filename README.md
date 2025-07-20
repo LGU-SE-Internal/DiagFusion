@@ -29,9 +29,9 @@ python main.py --config gaia_config.yaml
 ```
 
 ```bash
-INPUT_PATH=/mnt/jfs/rcabench_dataset/ts0-ts-food-delivery-service-exception-f5xmtg  \
-OUTPUT_PATH=/mnt/jfs/rcabench_dataset/ts0-ts-food-delivery-service-exception-f5xmtg \
-CHECKPOINT_PATH=/home/nn/workspace/DiagFusion/src/data/rcabench/demo/demo2/dgl/stratification_10/9/service_model.pt \
+INPUT_PATH=/mnt/jfs/rcabench_dataset/ts0-ts-admin-travel-service-cpu-exhaustion-wgmf5m  \
+OUTPUT_PATH=/mnt/jfs/rcabench_dataset/ts0-ts-admin-travel-service-cpu-exhaustion-wgmf5m \
+CHECKPOINT_PATH=/home/nn/workspace/DiagFusion/data/rcabench/demo/demo2/dgl/stratification_10/9/service_model.pt \
 ./entrypoint.sh
 ```
 
