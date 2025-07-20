@@ -75,12 +75,12 @@ def run_sentence_embedding(config):
     )
 
 
-def run_sentence_embedding_inference():
+def run_sentence_embedding_inference(config):
     sentence_embedding_inference(
         os.path.join(os.getenv("DYNACONF_PATHS__METADATA"), "event_embedding.pkl"),
         "./data/inference/demo/demo2/fasttext/temp/test.txt",
         "./data/inference/demo/demo2/sentence_embedding.pkl",
-        1,
+        config["he_dgl"]["N_S"],
     )
 
 

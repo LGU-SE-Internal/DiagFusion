@@ -183,4 +183,4 @@ def process_data_inference(
     # 训练得到的 fasttext 的 event embedding.pkl
     # 训练得到的 vectorizer 和 transformer 的 joblib 文件
     # 推理得到的 test.txt
-    run_sentence_embedding_inference()
+    run_sentence_embedding_inference(config)

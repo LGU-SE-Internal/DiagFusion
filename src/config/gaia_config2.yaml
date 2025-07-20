@@ -12,6 +12,7 @@ fasttext:
   minCount: 1
   nodes: ts-price-service ts-station-food-service ts-verification-code-service ts-station-service
     ts-route-service ts-route-plan-service ts-train-service ts-consign-price-service
+    ts-travel2-service ts-seat-service ts-basic-service ts-contacts-service
   sample_count: 1000
   save_path: fasttext/event_embedding.pkl
   supervised: true
@@ -32,7 +33,7 @@ feature_list:
   6: BOW_NGram_X
 feature_path: data/rcabench/feature
 he_dgl:
-  N_S: 8
+  N_S: 12
   TOPK_SA: 10
   Xs: sentence_embedding.pkl
   aug: false
@@ -45,6 +46,7 @@ he_dgl:
   lr: 0.001
   nodes: ts-price-service ts-station-food-service ts-verification-code-service ts-station-service
     ts-route-service ts-route-plan-service ts-train-service ts-consign-price-service
+    ts-travel2-service ts-seat-service ts-basic-service ts-contacts-service
   run_table: gt.csv
   save_dir: dgl/stratification_10
   save_model: true
@@ -62,12 +64,13 @@ parse:
   metric_path: anomalies/demo_metric.json
   nodes: ts-price-service ts-station-food-service ts-verification-code-service ts-station-service
     ts-route-service ts-route-plan-service ts-train-service ts-consign-price-service
+    ts-travel2-service ts-seat-service ts-basic-service ts-contacts-service
   parse_dir: parse
   save_path: parse/stratification_texts.pkl
   trace_path: anomalies/demo_trace.json
 result_path: result/rcabench/analysis
 sentence_embedding:
-  K_S: 8
+  K_S: 12
   save_path: sentence_embedding.pkl
   source_path: fasttext/event_embedding.pkl
   test_path: fasttext/temp/test.txt

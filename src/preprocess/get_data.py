@@ -16,7 +16,7 @@ def main():
         # "/mnt/jfs/rcabench-platform-v2/meta/rcabench_with_issues/index.parquet"
         "/mnt/jfs/rcabench-platform-v2/meta/rcabench_filtered/index.parquet"
     )
-    top_10 = cases["datapack"].head(10).tolist()
+    top_10 = cases["datapack"].head(20).tolist()
     data_paths = [
         # Path(f"/mnt/jfs/rcabench-platform-v2/data/rcabench_with_issues/{i}")
         Path(f"/mnt/jfs/rcabench-platform-v2/data/rcabench_filtered/{i}")

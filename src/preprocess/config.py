@@ -30,15 +30,25 @@ def update_config_nodes():
 
     # 读取yaml配置文件
     config_path = Path("src/config/gaia_config2.yaml")
+
+    inference_config_path = Path("src/config/inference.yaml")
+
     # 确保配置文件所在目录存在
     config_path.parent.mkdir(parents=True, exist_ok=True)
     with open(config_path, "r") as f:
         config = yaml.safe_load(f)
 
+    inference_config_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(inference_config_path, "r") as f:
+        inference_config = yaml.safe_load(f)
+
     # 更新nodes字段
     config["parse"]["nodes"] = nodes_str
     config["fasttext"]["nodes"] = nodes_str
     config["he_dgl"]["nodes"] = nodes_str
+    inference_config["parse"]["nodes"] = nodes_str
+    inference_config["fasttext"]["nodes"] = nodes_str
+    inference_config["he_dgl"]["N_S"] = service_count
 
     # 更新N_S为service数量
     config["he_dgl"]["N_S"] = service_count
@@ -47,6 +57,10 @@ def update_config_nodes():
     # 保存更新后的配置
     with open(config_path, "w") as f:
         yaml.dump(config, f, default_flow_style=False, allow_unicode=True)
+
+    # 保存更新后的配置
+    with open(inference_config_path, "w") as f:
+        yaml.dump(inference_config, f, default_flow_style=False, allow_unicode=True)
 
     logger.success("配置文件已更新！")
     logger.info(f"更新的nodes为: {nodes_str}")

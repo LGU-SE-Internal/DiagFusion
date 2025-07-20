@@ -8,7 +8,9 @@ fasttext:
   epoch: 5
   fasttext_dir: fasttext
   minCount: 1
-  nodes: service
+  nodes: ts-price-service ts-station-food-service ts-verification-code-service ts-station-service
+    ts-route-service ts-route-plan-service ts-train-service ts-consign-price-service
+    ts-travel2-service ts-seat-service ts-basic-service ts-contacts-service
   sample_count: 1000
   save_path: fasttext/event_embedding.pkl
   supervised: true
@@ -18,13 +20,16 @@ fasttext:
   train_da_path: fasttext/temp/train_da.txt
   train_path: fasttext/temp/train.txt
   vector_dim: 100
+he_dgl:
+  N_S: 12
 label: demo2
 parse:
+  inference: true
   log_path: anomalies/stratification_logs.npy
   metric_path: anomalies/demo_metric.json
-  nodes: service
+  nodes: ts-price-service ts-station-food-service ts-verification-code-service ts-station-service
+    ts-route-service ts-route-plan-service ts-train-service ts-consign-price-service
+    ts-travel2-service ts-seat-service ts-basic-service ts-contacts-service
   parse_dir: parse
   save_path: parse/stratification_texts.pkl
   trace_path: anomalies/demo_trace.json
-  inference: true
-
