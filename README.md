@@ -43,3 +43,14 @@ DYNACONF_PATHS__CKPT=./data/middle/checkpoints \
 "DYNACONF_PATHS__METADATA":"/data/middle/metadata",
 "DYNACONF_PATHS__CKPT":"/data/middle/checkpoints"
 ```
+
+```bash
+docker run -it \
+  -v /mnt/jfs/rcabench_dataset/ts0-ts-admin-travel-service-cpu-exhaustion-wgmf5m:/mnt/jfs/rcabench_dataset/ts0-ts-admin-travel-service-cpu-exhaustion-wgmf5m \
+  -e INPUT_PATH=/mnt/jfs/rcabench_dataset/ts0-ts-admin-travel-service-cpu-exhaustion-wgmf5m \
+  -e OUTPUT_PATH=/mnt/jfs/rcabench_dataset/ts0-ts-admin-travel-service-cpu-exhaustion-wgmf5m \
+  -e CHECKPOINT_PATH=./data/middle/checkpoints/service_model.pt \
+  -e DYNACONF_PATHS__METADATA=./data/middle/metadata \
+  -e DYNACONF_PATHS__CKPT=./data/middle/checkpoints \
+  diagfusion
+```

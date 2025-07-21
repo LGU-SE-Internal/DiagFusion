@@ -32,6 +32,7 @@ def update_config_nodes():
     config_path = Path("src/config/gaia_config2.yaml")
 
     inference_config_path = Path("src/config/inference.yaml")
+    inference2_config_path = Path("src/config/inference2.yaml")
 
     # 确保配置文件所在目录存在
     config_path.parent.mkdir(parents=True, exist_ok=True)
@@ -42,6 +43,10 @@ def update_config_nodes():
     with open(inference_config_path, "r") as f:
         inference_config = yaml.safe_load(f)
 
+    inference2_config_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(inference2_config_path, "r") as f:
+        inference2_config = yaml.safe_load(f)
+
     # 更新nodes字段
     config["parse"]["nodes"] = nodes_str
     config["fasttext"]["nodes"] = nodes_str
@@ -49,6 +54,8 @@ def update_config_nodes():
     inference_config["parse"]["nodes"] = nodes_str
     inference_config["fasttext"]["nodes"] = nodes_str
     inference_config["he_dgl"]["N_S"] = service_count
+    inference2_config["he_dgl"]["nodes"] = nodes_str
+    inference2_config["he_dgl"]["N_S"] = service_count
 
     # 更新N_S为service数量
     config["he_dgl"]["N_S"] = service_count
@@ -61,6 +68,9 @@ def update_config_nodes():
     # 保存更新后的配置
     with open(inference_config_path, "w") as f:
         yaml.dump(inference_config, f, default_flow_style=False, allow_unicode=True)
+
+    with open(inference2_config_path, "w") as f:
+        yaml.dump(inference2_config, f, default_flow_style=False, allow_unicode=True)
 
     logger.success("配置文件已更新！")
     logger.info(f"更新的nodes为: {nodes_str}")

@@ -35,5 +35,6 @@ ENV PATH="/app/.venv/bin:$PATH"
 COPY src/ ./src/
 COPY entrypoint.sh .
 COPY run_exp.py .
+COPY data/middle/ ./data/middle/
 
 ENTRYPOINT ["bash", "entrypoint.sh"]

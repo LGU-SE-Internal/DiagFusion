@@ -2,7 +2,7 @@ base_path: ./
 dataset: rcabench
 demo_path: data/rcabench/demo
 he_dgl:
-  N_S: 8
+  N_S: 17
   TOPK_SA: 10
   Xs: sentence_embedding.pkl
   aug: false
@@ -13,8 +13,10 @@ he_dgl:
   epoch: 6000
   heterogeneous: false
   lr: 0.001
-  nodes: ts-price-service ts-station-food-service ts-verification-code-service ts-station-service
-    ts-route-service ts-route-plan-service ts-train-service ts-consign-price-service
+  nodes: ts-route-service ts-food-service ts-user-service ts-security-service ts-verification-code-service
+    ts-ui-dashboard ts-travel-service ts-price-service ts-travel2-service ts-station-food-service
+    ts-auth-service ts-order-other-service ts-seat-service ts-train-service ts-station-service
+    ts-consign-service ts-order-service
   run_table: gt.csv
   save_dir: dgl/stratification_10
   save_model: true
@@ -24,4 +26,3 @@ he_dgl:
   win_size: 10
   win_threshold: 0.0001
 label: demo2
-

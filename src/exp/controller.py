@@ -301,9 +301,9 @@ class UnircaLab:
 class UnircaLab_inference:
     def __init__(self, config):
         self.config = config
-        instances = config["nodes"].split()
+        instances = config["he_dgl"]["nodes"].split()
         self.ins_dict = dict(zip(instances, range(len(instances))))
-        if config["dataset"] == "rcabench":
+        if config["he_dgl"]["dataset"] == "rcabench":
             # 从service_instance_mapping.json读取拓扑信息
             mapping_path = os.path.join(
                 os.getenv("DYNACONF_PATHS__METADATA"), "service_instance_mapping.json"

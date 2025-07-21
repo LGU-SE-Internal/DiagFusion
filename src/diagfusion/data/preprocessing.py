@@ -203,8 +203,8 @@ class InferenceDataProcess:
         dataset: 数据集名称 可选['21aiops', 'gaia']
     """
 
-    def __init__(self, config):
-        self.config = config
+    def __init__(self):
+        pass
 
     def process(self):
         """用来获取并保存中间数据，仅用于推理场景

@@ -32,13 +32,12 @@ class diagfusion(Algorithm):
 
         process_data_inference(data_paths, cache_dir="./cache")
 
-        config = yaml.safe_load(open("./src/config/inference2.yaml"))
+        he_dgl_config = yaml.safe_load(open("./src/config/inference2.yaml"))
 
         # 保存相应的数据到对应目录
         # 输入：
         #     sentence_embedding.pkl
-        he_dgl_config = deal_config(config, "he_dgl")
-        InferenceDataProcess(he_dgl_config).process()
+        InferenceDataProcess().process()
 
         # 从环境变量获取模型文件路径
         model_path = os.getenv("CHECKPOINT_PATH")
