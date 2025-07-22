@@ -8,3 +8,5 @@ cache/
 *.txt
 *.parquet
 *.finished
+*.pt
+*.joblib
