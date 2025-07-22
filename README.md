@@ -23,7 +23,9 @@ D1 contains two datasets: MicroSS and Companion Data. We use MicroSS, for it pro
 ## Demo
 We provide a demo. Please run:
 ```
-python main.py --config gaia_config.yaml
+python client.py --config gaia_config2.yaml
+
+
 ./main.py eval single diagfusion rcabench_filtered ts3-ts-travel-service-response-delay-s4plkv
 ./main.py eval batch -d rcabench_filtered -a diagfusion --clear
 ```
