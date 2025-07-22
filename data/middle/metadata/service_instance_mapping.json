@@ -1,0 +1,138 @@
+{
+    "service_id_to_name": {
+        "0": "ts-price-service",
+        "1": "ts-security-service",
+        "2": "ts-route-service",
+        "3": "ts-train-food-service",
+        "4": "ts-travel2-service",
+        "5": "ts-auth-service",
+        "6": "ts-inside-payment-service",
+        "7": "ts-train-service",
+        "8": "ts-route-plan-service",
+        "9": "ts-user-service",
+        "10": "ts-config-service",
+        "11": "ts-contacts-service",
+        "12": "ts-food-service",
+        "13": "ts-basic-service",
+        "14": "ts-order-other-service",
+        "15": "ts-station-service",
+        "16": "ts-order-service",
+        "17": "ts-seat-service",
+        "18": "ts-verification-code-service",
+        "19": "ts-travel-service",
+        "20": "ts-consign-price-service",
+        "21": "ts-travel-plan-service",
+        "22": "ts-preserve-service",
+        "23": "ts-consign-service",
+        "24": "ts-assurance-service",
+        "25": "ts-ui-dashboard"
+    },
+    "service_instance_map": {
+        "0": [
+            0
+        ],
+        "1": [
+            1
+        ],
+        "2": [
+            2
+        ],
+        "3": [
+            3
+        ],
+        "4": [
+            4
+        ],
+        "5": [
+            5
+        ],
+        "6": [
+            6
+        ],
+        "7": [
+            7
+        ],
+        "8": [
+            8
+        ],
+        "9": [
+            9
+        ],
+        "10": [
+            10
+        ],
+        "11": [
+            11
+        ],
+        "12": [
+            12
+        ],
+        "13": [
+            13
+        ],
+        "14": [
+            14
+        ],
+        "15": [
+            15
+        ],
+        "16": [
+            16
+        ],
+        "17": [
+            17
+        ],
+        "18": [
+            18
+        ],
+        "19": [
+            19
+        ],
+        "20": [
+            20
+        ],
+        "21": [
+            21
+        ],
+        "22": [
+            22
+        ],
+        "23": [
+            23
+        ],
+        "24": [
+            24
+        ],
+        "25": [
+            25
+        ]
+    },
+    "instance_to_id": {
+        "ts-price-service": 0,
+        "ts-security-service": 1,
+        "ts-route-service": 2,
+        "ts-train-food-service": 3,
+        "ts-travel2-service": 4,
+        "ts-auth-service": 5,
+        "ts-inside-payment-service": 6,
+        "ts-train-service": 7,
+        "ts-route-plan-service": 8,
+        "ts-user-service": 9,
+        "ts-config-service": 10,
+        "ts-contacts-service": 11,
+        "ts-food-service": 12,
+        "ts-basic-service": 13,
+        "ts-order-other-service": 14,
+        "ts-station-service": 15,
+        "ts-order-service": 16,
+        "ts-seat-service": 17,
+        "ts-verification-code-service": 18,
+        "ts-travel-service": 19,
+        "ts-consign-price-service": 20,
+        "ts-travel-plan-service": 21,
+        "ts-preserve-service": 22,
+        "ts-consign-service": 23,
+        "ts-assurance-service": 24,
+        "ts-ui-dashboard": 25
+    }
+}
