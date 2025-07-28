@@ -33,7 +33,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 ENV PATH="/app/.venv/bin:$PATH"
 
 COPY src/ ./src/
-COPY entrypoint.sh .
+COPY entrypoint.sh /entrypoint.sh
 COPY run_exp.py .
 COPY data/middle/ ./data/middle/
 
