@@ -1,0 +1,2 @@
+index,datetime,service,instance,anomaly_type,st_time,ed_time,duration,data_type
+0,2025-07-21,service,service,13,2025-07-21 19:43:35+00:00,2025-07-21 19:47:35+00:00,4,test
