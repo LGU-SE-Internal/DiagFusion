@@ -1,1 +1,6 @@
 name = "diagfusion"
+
+[env_vars]
+CHECKPOINT_PATH = "/data/middle/checkpoints/service_model.pt"
+DYNACONF_PATHS__METADATA = "/data/middle/metadata"
+DYNACONF_PATHS__CKPT = "/data/middle/checkpoints"
