@@ -1,13 +1,12 @@
-import json
 import os
-import pandas as pd
+import sys
+from pathlib import Path
 from typing import Optional
 
+import pandas as pd
 import yaml
-from src.preprocess.process_metric import (
-    process_parquet_files,
-    process_parquet_files_inference,
-)
+from rcabench_platform.v2.utils.serde import load_json
+
 from src.preprocess.dataset.dataset_log import (
     derive_filename,
     preprocess_logs,
@@ -17,19 +16,20 @@ from src.preprocess.dataset.dataset_trace import (
     save_trace_data,
     save_trace_data_inference,
 )
-from pathlib import Path
-import sys
+from src.preprocess.process_metric import (
+    process_parquet_files,
+    process_parquet_files_inference,
+)
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from preprocess.config import update_config_nodes
-from src.utils.logger import logger
 from src.diagfusion.data.preprocessing import (
-    run_parse,
     run_fasttext_inference,
+    run_parse,
     run_sentence_embedding_inference,
-    run_sentence_embedding,
 )
-from src.exp.config import deal_config, get_config
+from src.exp.config import deal_config
+from src.utils.logger import logger
 
 
 def preprocess_injection(
@@ -39,7 +39,7 @@ def preprocess_injection(
     """从injection文件中提取信息生成ground truth数据
 
     Args:
-        data_paths: 数据文件路径列表
+        data_paths: 数据文件路径列表 (converted paths)
         output_path: 输出CSV文件路径
 
     Returns:
@@ -51,21 +51,25 @@ def preprocess_injection(
 
     records = []
     for idx, data_pack in enumerate(data_paths):
-        # 获取相关文件路径
-        fs = derive_filename(data_pack)
+        # For converted paths, look for injection file in parent directory
+        if data_pack.name == "converted":
+            injection_path = data_pack / "injection.json"
+        else:
+            # Fallback to original logic
+            fs = derive_filename(data_pack)
+            injection_path = fs.get("injection")
 
         # 检查injection文件是否存在
-        if "injection" not in fs or not os.path.exists(fs["injection"]):
-            raise FileNotFoundError(f"Injection file not found for {data_pack.name}")
+        if not injection_path or not os.path.exists(injection_path):
+            logger.warning(f"Injection file not found for {data_pack.name}")
+            continue
 
         # 读取injection文件
-        with open(fs["injection"], "r") as f:
-            injection = json.load(f)
+        injection = load_json(path=injection_path)
 
         # 没找到 groundtruth 字段，跳过
         if "ground_truth" not in injection:
             continue
-
 
         service = injection["ground_truth"]["service"][0]
         instance = service
@@ -151,7 +155,7 @@ def process_data_inference(
         config: 配置字典,可选
         cache_dir: 缓存目录路径
     """
-    output_path = Path("./data/inference/demo/demo2/anomalies")
+    output_path = Path("./data/inference/demo/demo2/anomalies") / data_path.name
 
     # 预处理日志数据
     processed_logs = preprocess_logs_inference(data_path, output_path, cache_dir)

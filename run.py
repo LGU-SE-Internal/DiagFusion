@@ -20,7 +20,7 @@ from rcabench_platform.v2.datasets.rcabench import valid
 from rcabench_platform.v2.logging import logger, timeit
 from rcabench_platform.v2.sources.convert import convert_datapack
 from rcabench_platform.v2.sources.rcabench import RcabenchDatapackLoader
-from rcaeval_rcd.rcd import RCD
+from src.diagfusion.DiagfusionClass import diagfusion
 app = typer.Typer(pretty_exceptions_show_locals=False)
 
 
@@ -70,7 +70,7 @@ def run_job(
             dataset="rcabench",
             datapack=injection_name,
             input_folder=converted_input_path,
-            output_folder=Path("/tmp/baro_output") / injection_name,
+            output_folder=Path("/tmp/diagfusion_output") / injection_name,
         )
     )
 
@@ -223,8 +223,8 @@ def single_test(
     label: str | None = None,
 ):
     run_job(
-        algorithm=RCD,
-        algorithm_id=6,
+        algorithm=diagfusion,
+        algorithm_id=5,
         injection_id=2287,
         injection_name=name,
         label=label,
@@ -233,7 +233,7 @@ def single_test(
 
 @app.command()
 def batch_test(label: str | None = None):
-    run_batch(algorithm=RCD, algorithm_id=6, datasets=[2, 3, 4, 5], label=label)
+    run_batch(algorithm=diagfusion, algorithm_id=5, datasets=[4], label=label)
 
 
 if __name__ == "__main__":

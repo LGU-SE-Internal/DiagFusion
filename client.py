@@ -1,24 +1,33 @@
 import os
-from src.exp.controller import UnircaLab
-from src.exp.config import deal_config, get_config
+import sys
+
 import pandas as pd
+import typer
+
 from src.diagfusion.data.preprocessing import (
-    run_parse,
     run_fasttext,
+    run_parse,
     run_sentence_embedding,
 )
+from src.exp.config import deal_config, get_config
+from src.exp.controller import UnircaLab
 from src.utils.logger import logger
-import sys
 
 sys.path.append(
     os.path.join(os.path.dirname(os.path.abspath(__file__)), "src/preprocess")
 )
 from src.preprocess.get_data import main as get_data_main
 
-if __name__ == "__main__":
+app = typer.Typer()
+
+
+@app.command()
+def train(
+    dataset_id: int =3
+):
     logger.info("[Data Preprocess]")
     logger.info("[Get Data]")
-    get_data_main()
+    get_data_main(dataset_id)
     # 1. 处理数据
     logger.info("[diagfusion]")
     # diagfusion
@@ -43,3 +52,7 @@ if __name__ == "__main__":
     logger.info("[dgl]")
     lab_id = 9  # 实验唯一编号
     UnircaLab(deal_config(config, "he_dgl")).do_lab(lab_id)
+
+
+if __name__ == "__main__":
+    app()
