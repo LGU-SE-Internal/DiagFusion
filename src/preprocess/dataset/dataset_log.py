@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 from .dataset import RCABenchDataset
 from src.utils.logger import logger
-
+import polars as pl
 
 def derive_filename(data_pack: Path) -> dict:
     """
@@ -192,7 +192,7 @@ def preprocess_logs(
 
     # 存储每个data_pack的日志序列
     log_sequences = []
-
+    lfs = []
     for data_pack in data_paths:
         # 获取相关文件路径
         fs = derive_filename(data_pack)
@@ -200,35 +200,42 @@ def preprocess_logs(
         # 检查必要文件是否存在
         if "abnormal_logs" not in fs or not os.path.exists(fs["abnormal_logs"]):
             raise FileNotFoundError(f"Abnormal log file not found for {data_pack.name}")
-        if "injection" not in fs or not os.path.exists(fs["injection"]):
-            raise FileNotFoundError(f"Injection file not found for {data_pack.name}")
-
-        # 读取injection文件
-        with open(fs["injection"], "r") as f:
-            injection = json.load(f)
-
-        # 没找到 groundtruth 字段，跳过
-        if "ground_truth" not in injection:
-            continue
 
         # 读取并预处理数据
-        df = pd.read_parquet(fs["abnormal_logs"])
-        df = df[df["service_name"] != "ts-ui-dashboard"].sort_values(by="time")
+        lf = pl.scan_parquet(fs["abnormal_logs"])
+        lfs.append(lf)
+    lf = pl.concat(lfs)
+    lf = lf.filter(pl.col("service_name") != "ts-ui-dashboard").sort("time")
 
-        # 只取前20条日志
-        df = df.head(20)
+    # 时间转换为毫秒级时间戳
+    lf = lf.with_columns([
+        pl.col("time").dt.timestamp(time_unit="ms").alias("time")
+    ])
 
-        # 时间转换为毫秒级时间戳
-        df["time"] = pd.to_datetime(df["time"], unit="s").astype(np.int64) // 10**6
+    # 提取日志模板并计算模板ID
+    df = lf.collect()
 
-        # 提取日志模板并计算模板ID
-        df["template"] = df["message"].apply(drain)
-        # df["template_id"] = df["template"].apply(lambda x: hex(abs(hash(x)))[2:10])
-        df["template_id"] = df["template"].apply(generate_template_id)
+    # 获取唯一的消息
+    unique_messages = df["message"].unique().to_list()
 
-        # 将当前data_pack的日志转换为[time, service_name, template_id]格式的列表
-        log_sequence = df[["time", "service_name", "template_id"]].values.tolist()
-        log_sequences.append(log_sequence)
+    # 对唯一消息进行drain处理
+    message_to_template = {}
+    message_to_template_id = {}
+    for msg in unique_messages:
+        template = drain(msg)
+        template_id = generate_template_id(template)
+        message_to_template[msg] = template
+        message_to_template_id[msg] = template_id
+
+    # 映射回原始数据
+    df = df.with_columns([
+        pl.col("message").map_elements(lambda x: message_to_template[x], return_dtype=pl.Utf8).alias("template"),
+        pl.col("message").map_elements(lambda x: message_to_template_id[x], return_dtype=pl.Utf8).alias("template_id")
+    ])
+
+    # 将当前data_pack的日志转换为[time, service_name, template_id]格式的列表
+    log_sequences = df.select(["time", "service_name", "template_id"]).to_numpy().tolist()
+
 
     # 保存缓存
     drain.save_cache()
@@ -270,24 +277,36 @@ def preprocess_logs_inference(
     # 存储每个data_pack的日志序列
     log_sequences = []
 
-    # 读取并预处理数据
-    df = pd.read_parquet(os.path.join(data_path, "abnormal_logs.parquet"))
-    df = df[df["service_name"] != "ts-ui-dashboard"].sort_values(by="time")
-
-    # 只取前20条日志
-    df = df.head(20)
+    lf = pl.scan_parquet(os.path.join(data_path, "abnormal_logs.parquet"))
+    lf = lf.filter(pl.col("service_name") != "ts-ui-dashboard").sort("time")
 
     # 时间转换为毫秒级时间戳
-    df["time"] = pd.to_datetime(df["time"], unit="s").astype(np.int64) // 10**6
+    lf = lf.with_columns([
+        pl.col("time").dt.timestamp(time_unit="ms").alias("time")
+    ])
 
-    # 提取日志模板并计算模板ID
-    df["template"] = df["message"].apply(drain)
-    # df["template_id"] = df["template"].apply(lambda x: hex(abs(hash(x)))[2:10])
-    df["template_id"] = df["template"].apply(generate_template_id)
+    df = lf.collect()
+
+    # 获取唯一的消息
+    unique_messages = df["message"].unique().to_list()
+
+    # 对唯一消息进行drain处理
+    message_to_template = {}
+    message_to_template_id = {}
+    for msg in unique_messages:
+        template = drain(msg)
+        template_id = generate_template_id(template)
+        message_to_template[msg] = template
+        message_to_template_id[msg] = template_id
+
+    # 映射回原始数据
+    df = df.with_columns([
+        pl.col("message").map_elements(lambda x: message_to_template[x], return_dtype=pl.Utf8).alias("template"),
+        pl.col("message").map_elements(lambda x: message_to_template_id[x], return_dtype=pl.Utf8).alias("template_id")
+    ])
 
     # 将当前data_pack的日志转换为[time, service_name, template_id]格式的列表
-    log_sequence = df[["time", "service_name", "template_id"]].values.tolist()
-    log_sequences.append(log_sequence)
+    log_sequences = df.select(["time", "service_name", "template_id"]).to_numpy().tolist()
 
     # 保存缓存
     drain.save_cache()
