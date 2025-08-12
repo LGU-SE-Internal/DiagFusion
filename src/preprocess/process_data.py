@@ -66,12 +66,8 @@ def preprocess_injection(
         if "ground_truth" not in injection:
             continue
 
-        service = (
-            injection["ground_truth"]["service"][1]
-            if len(injection["ground_truth"]["service"]) > 1
-            else injection["ground_truth"]["service"][0]
-        )
-        # service = injection["ground_truth"]["service"][0]
+
+        service = injection["ground_truth"]["service"][0]
         instance = service
 
         # 提取时间信息
