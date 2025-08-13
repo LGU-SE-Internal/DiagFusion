@@ -1,8 +1,6 @@
 base_path: ./
 dataset: rcabench
 demo_path: data/rcabench/demo
-event_path: data/rcabench/events
-exploration_path: exploration/gaia/pics
 fasttext:
   da_method: w2v
   dataset: rcabench
@@ -62,8 +60,6 @@ he_dgl:
   win_size: 10
   win_threshold: 0.0001
 label: demo2
-log_path: data/rcabench/demo/log
-metric_path: data/rcabench/demo/metric
 parse:
   inference: false
   log_path: anomalies/stratification_logs.npy
@@ -84,5 +80,3 @@ sentence_embedding:
   source_path: fasttext/event_embedding.pkl
   test_path: fasttext/temp/test.txt
   train_path: fasttext/temp/train.txt
-source_data_path: data/rcabench/source_data
-trace_path: data/rcabench/demo/trace
