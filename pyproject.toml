@@ -6,7 +6,6 @@ readme = "README.md"
 requires-python = "==3.10.16"
 license = {text = "MIT"}
 dependencies = [
-    "matplotlib==3.10.3",
     "numpy==2.2.6",
     "pandas==2.3.1",
     "py2neo==2021.2.4",
@@ -20,7 +19,7 @@ dependencies = [
     "jsonpickle==2.2.0",
     "loguru",
     "pyarrow",
-    "rcabench-platform>=0.3.24",
+    "rcabench-platform>=0.3.25",
     "rcabench>=1.1.30",
     "polars",
 ]

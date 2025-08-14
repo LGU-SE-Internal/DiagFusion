@@ -17,7 +17,7 @@ from src.preprocess.process_data import process_data_inference
 
 class diagfusion(Algorithm):
     def needs_cpu_count(self) -> int | None:
-        return 4
+        return None
 
     def __call__(self, args: AlgorithmArgs) -> list[AlgorithmAnswer]:
         # 输入参数为 输入 case 的路径

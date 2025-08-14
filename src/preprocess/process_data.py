@@ -155,7 +155,7 @@ def process_data_inference(
         config: 配置字典,可选
         cache_dir: 缓存目录路径
     """
-    output_path = Path("./data/inference/demo/demo2/anomalies") / data_path.name
+    output_path = Path("./data/inference/demo/demo2/anomalies")
 
     # 预处理日志数据
     processed_logs = preprocess_logs_inference(data_path, output_path, cache_dir)

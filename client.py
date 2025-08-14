@@ -18,10 +18,9 @@ sys.path.append(
 )
 from src.preprocess.get_data import main as get_data_main
 
-app = typer.Typer()
 
 
-@app.command()
+
 def train(
     dataset_id: int =3
 ):
@@ -55,4 +54,4 @@ def train(
 
 
 if __name__ == "__main__":
-    app()
+    train()

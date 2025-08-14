@@ -418,13 +418,13 @@ def metric_trace_log_parse(trace, metric, logs, labels, save_path, nodes):
     if not logs is None:
         logs = list(logs)
         log = {x: [] for x in labels.index}
-        if labels.index[-1] + 1 == len(log):
+        if labels.index[-1] + 1 == len(logs):
             for k, v in log.items():
-                log[k] = logs[int(k)]
+                log[k] = [logs[int(k)].tolist()] if hasattr(logs[int(k)], 'tolist') else [logs[int(k)]]
         else:
             count = 0
             for k, v in log.items():
-                log[k] = logs[count]
+                log[k] = [logs[count].tolist()] if hasattr(logs[count], 'tolist') else [logs[count]]
                 count += 1
 
     service_name = nodes.split()
@@ -464,7 +464,7 @@ def metric_trace_log_parse(trace, metric, logs, labels, save_path, nodes):
                     ]
                 )
         # 日志
-        if not logs is None:
+        if not log is None:
             for inner_key in inner_dict_key:
                 demo_metric[case_id][inner_key].extend(
                     [[y[0], y[2]] for y in log[case_id] if y[1] == inner_key[0]]
@@ -482,13 +482,13 @@ def metric_trace_log_parse_inference(trace, metric, logs, labels, save_path, nod
     if not logs is None:
         logs = list(logs)
         log = {x: [] for x in labels.index}
-        if labels.index[-1] + 1 == len(log):
+        if labels.index[-1] + 1 == len(logs):
             for k, v in log.items():
-                log[k] = logs[int(k)]
+                log[k] = [logs[int(k)].tolist()] if hasattr(logs[int(k)], 'tolist') else [logs[int(k)]]
         else:
             count = 0
             for k, v in log.items():
-                log[k] = logs[count]
+                log[k] = [logs[count].tolist()] if hasattr(logs[count], 'tolist') else [logs[count]]
                 count += 1
 
     service_name = nodes.split()
