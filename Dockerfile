@@ -32,9 +32,6 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 ENV PATH="/app/.venv/bin:$PATH"
 
-COPY src/ ./src/
-COPY entrypoint.sh /entrypoint.sh
-COPY main.py .
-COPY data/middle/ ./data/middle/
+COPY . .
 
 ENTRYPOINT ["bash", "entrypoint.sh"]
