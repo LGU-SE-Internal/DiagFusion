@@ -8,12 +8,8 @@ fasttext:
   epoch: 5
   fasttext_dir: fasttext
   minCount: 1
-  nodes: ts-price-service ts-security-service ts-route-service ts-train-food-service
-    ts-travel2-service ts-auth-service ts-inside-payment-service ts-train-service
-    ts-route-plan-service ts-user-service ts-config-service ts-contacts-service ts-food-service
-    ts-basic-service ts-order-other-service ts-station-service ts-order-service ts-seat-service
-    ts-verification-code-service ts-travel-service ts-consign-price-service ts-travel-plan-service
-    ts-preserve-service ts-consign-service ts-assurance-service ts-ui-dashboard
+  nodes: ts-security-service ts-basic-service ts-auth-service mysql ts-ui-dashboard
+    ts-travel2-service ts-assurance-service
   sample_count: 1000
   save_path: fasttext/event_embedding.pkl
   supervised: true
@@ -24,18 +20,14 @@ fasttext:
   train_path: fasttext/temp/train.txt
   vector_dim: 100
 he_dgl:
-  N_S: 26
+  N_S: 7
 label: demo2
 parse:
   inference: true
   log_path: anomalies/stratification_logs.npy
   metric_path: anomalies/demo_metric.json
-  nodes: ts-price-service ts-security-service ts-route-service ts-train-food-service
-    ts-travel2-service ts-auth-service ts-inside-payment-service ts-train-service
-    ts-route-plan-service ts-user-service ts-config-service ts-contacts-service ts-food-service
-    ts-basic-service ts-order-other-service ts-station-service ts-order-service ts-seat-service
-    ts-verification-code-service ts-travel-service ts-consign-price-service ts-travel-plan-service
-    ts-preserve-service ts-consign-service ts-assurance-service ts-ui-dashboard
+  nodes: ts-security-service ts-basic-service ts-auth-service mysql ts-ui-dashboard
+    ts-travel2-service ts-assurance-service
   parse_dir: parse
   save_path: parse/stratification_texts.pkl
   trace_path: anomalies/demo_trace.json

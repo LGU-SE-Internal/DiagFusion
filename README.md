@@ -37,7 +37,7 @@ sudo -E .venv/bin/python  client.py --config gaia_config2.yaml
 sudo cp data/rcabench/demo/demo2/dgl/stratification_10/9/topology.pkl data/middle/metadata/ -f
 sudo cp data/rcabench/demo/demo2/anomalies/service_instance_mapping.json data/middle/metadata/ -f
 sudo rm -rf data/rcabench/demo/demo2
-git restore src/config
+#git restore src/config
 docker build -t 10.10.10.240/library/rca-algo-diagfusion:train1 .
 sudo -E .venv/bin/python run.py batch-test --label train1
 

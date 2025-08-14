@@ -19,7 +19,7 @@ dependencies = [
     "jsonpickle==2.2.0",
     "loguru",
     "pyarrow",
-    "rcabench-platform>=0.3.25",
+    "rcabench-platform>=0.3.26",
     "rcabench>=1.1.30",
     "polars",
 ]

@@ -219,14 +219,13 @@ def run_batch(
 
 @app.command()
 def single_test(
-    name: str = "ts3-ts-basic-service-request-replace-method-4css6n",
     label: str | None = None,
 ):
     run_job(
         algorithm=diagfusion,
         algorithm_id=5,
-        injection_id=2287,
-        injection_name=name,
+        injection_id=1751,
+        injection_name="ts4-ts-basic-service-response-replace-body-jbn747",
         label=label,
     )
 
