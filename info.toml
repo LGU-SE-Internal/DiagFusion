@@ -1,5 +1,5 @@
 name = "diagfusion"
-tag = "train1"
+tag = "study"
 [env_vars]
 CHECKPOINT_PATH = "data/middle/checkpoints/service_model.pt"
 DYNACONF_PATHS__METADATA = "data/middle/metadata"

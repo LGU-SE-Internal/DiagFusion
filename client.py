@@ -22,7 +22,7 @@ from src.preprocess.get_data import main as get_data_main
 
 
 def train(
-    dataset_id: int =3
+    dataset_id: int =7
 ):
     logger.info("[Data Preprocess]")
     logger.info("[Get Data]")

@@ -38,7 +38,7 @@ sudo cp data/rcabench/demo/demo2/dgl/stratification_10/9/topology.pkl data/middl
 sudo cp data/rcabench/demo/demo2/anomalies/service_instance_mapping.json data/middle/metadata/ -f
 sudo rm -rf data/rcabench/demo/demo2
 #git restore src/config
-docker build -t 10.10.10.240/library/rca-algo-diagfusion:train1 .
+docker build -t 10.10.10.240/library/rca-algo-diagfusion:study .
 sudo -E .venv/bin/python run.py batch-test --label train1
 
 
