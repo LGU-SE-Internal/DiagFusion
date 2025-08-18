@@ -27,6 +27,8 @@ uv run run_algo.py submit-execution -a diagfusion -d ts0-ts-admin-route-service-
 # train
 ```sh
 sudo juicefs mount redis://10.10.10.119:6379/1 /mnt/jfs -d --cache-size=1024
+mkdir data
+ln -s /mnt/jfs/rcabench_dataset ./data/
 export CHECKPOINT_PATH=./data/middle/checkpoints/service_model.pt 
 export DYNACONF_PATHS__METADATA=./data/middle/metadata 
 export DYNACONF_PATHS__CKPT=./data/middle/checkpoints 
