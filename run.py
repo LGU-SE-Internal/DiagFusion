@@ -223,8 +223,8 @@ def single_test(
 ):
     run_job(
         algorithm=diagfusion,
-        algorithm_id=5,
-        injection_id=1751,
+        algorithm_id=75,
+        injection_id=5167,
         injection_name="ts4-ts-basic-service-response-replace-body-jbn747",
         label=label,
     )
@@ -232,7 +232,7 @@ def single_test(
 
 @app.command()
 def batch_test(label: str | None = None):
-    run_batch(algorithm=diagfusion, algorithm_id=5, datasets=[4], label=label)
+    run_batch(algorithm=diagfusion, algorithm_id=75, datasets=[8], label=label)
 
 
 if __name__ == "__main__":

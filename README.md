@@ -30,16 +30,36 @@ sudo juicefs mount redis://10.10.10.119:6379/1 /mnt/jfs -d --cache-size=1024
 export CHECKPOINT_PATH=./data/middle/checkpoints/service_model.pt 
 export DYNACONF_PATHS__METADATA=./data/middle/metadata 
 export DYNACONF_PATHS__CKPT=./data/middle/checkpoints 
-export RCABENCH_BASE_URL=http://127.0.0.1:8082
+export RCABENCH_BASE_URL=http://10.10.10.220:32080
 export RCABENCH_USERNAME=admin
 export RCABENCH_PASSWORD=admin123
+# train
 sudo -E .venv/bin/python  client.py --config gaia_config2.yaml
+```
+# post patch
+```sh
 sudo cp data/rcabench/demo/demo2/dgl/stratification_10/9/topology.pkl data/middle/metadata/ -f
 sudo cp data/rcabench/demo/demo2/anomalies/service_instance_mapping.json data/middle/metadata/ -f
 sudo rm -rf data/rcabench/demo/demo2
-#git restore src/config
+```
+# build
+```sh
 docker build -t 10.10.10.240/library/rca-algo-diagfusion:study .
-sudo -E .venv/bin/python run.py batch-test --label train1
+```
+# upload
+```sh
+rca upload-algorithm-harbor ./
+```
+# test
+```sh
+sudo -E .venv/bin/python run.py batch-test --label 8.17diagfusion # note this label, we will use it later for cross-dataset metrics
+```
+
+# check accuracy
+```sh
+# use the latest platform
+rca cross-dataset-metrics -a diagfusion -d pair-diag -dv study-test --tag 8.17diagfusion
+```
 
 
 ```
