@@ -54,13 +54,13 @@ rca upload-algorithm-harbor ./
 ```
 # test
 ```sh
-sudo -E .venv/bin/python run.py batch-test --label 8.17diagfusion # note this label, we will use it later for cross-dataset metrics
+sudo -E .venv/bin/python run.py batch-test --label 8.26run # note this label, we will use it later for cross-dataset metrics
 ```
 
 # check accuracy
 ```sh
 # use the latest platform
-rca cross-dataset-metrics -a diagfusion -d pair-diag -dv study-test --tag 8.17diagfusion
+rca cross-dataset-metrics -a diagfusion -d pair-diag -dv study-test --tag 8.26run
 ```
 
 

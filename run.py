@@ -64,21 +64,25 @@ def run_job(
     )
 
     a = algorithm()
-
+    t0 = time.time()
     answers = a(
         AlgorithmArgs(
             dataset="rcabench",
             datapack=injection_name,
             input_folder=converted_input_path,
-            output_folder=Path("/tmp/diagfusion_output") / injection_name,
+            output_folder=Path("/tmp/baro_output") / injection_name,
         )
     )
+    t1 = time.time()
+    runtime = t1 - t0
 
     result_rows = [
         {"level": ans.level, "result": ans.name, "rank": ans.rank, "confidence": 0}
         for ans in answers
     ]
-
+    if len(answers) == 0:
+        logger.warning(f"No answers from algorithm `{algorithm}`")
+        return
     with RCABenchClient() as client:
         algo_api = AlgorithmsApi(client)
 
@@ -97,6 +101,7 @@ def run_job(
                     for row in result_rows
                 ],
                 datapack_id=injection_id,
+                duration=runtime,
             ),
         )
         logger.info(
@@ -232,7 +237,7 @@ def single_test(
 
 @app.command()
 def batch_test(label: str | None = None):
-    run_batch(algorithm=diagfusion, algorithm_id=75, datasets=[8], label=label)
+    run_batch(algorithm=diagfusion, algorithm_id=75, datasets=[18], label=label)
 
 
 if __name__ == "__main__":
