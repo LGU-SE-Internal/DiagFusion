@@ -9,6 +9,10 @@ import pandas as pd
 from .dataset import RCABenchDataset
 from src.utils.logger import logger
 import polars as pl
+from typing import List
+from drain3 import TemplateMiner
+from drain3.file_persistence import FilePersistence
+from drain3.template_miner_config import TemplateMinerConfig
 
 def derive_filename(data_pack: Path) -> dict:
     """
@@ -33,26 +37,7 @@ def load_injection_data(path: str) -> tuple[str, str]:
     return "mock_fault_type", "mock_target_service"
 
 
-class FilePersistence:
-    def __init__(self, save_path):
-        pass
-
-
-class TemplateMinerConfig:
-    def load(self, path):
-        pass
-
-
-class TemplateMiner:
-    def __init__(self, persistence, config):
-        pass
-
-    def add_log_message(self, line: str) -> dict:
-        template = " ".join([word for word in line.split() if not word.isdigit()])
-        return {"template_mined": template or "default_template"}
-
-
-class DrainProcesser:
+class DrainProcessor:
     def __init__(self, conf: str, save_path: str, cache_dir: str = "./cache/drain"):
         persistence = FilePersistence(save_path)
         miner_config = TemplateMinerConfig()
@@ -62,112 +47,78 @@ class DrainProcesser:
             Path(cache_dir) / "sentence_templates.pkl"
         )
 
-    def __call__(self, sentence: str) -> str:
-        """Processes a log message to extract its template, using a cache."""
+    def process(self, sentence: str) -> str:
         line = str(sentence).strip()
         if not line:
             return ""
 
-        return self._cache_manager.get_or_compute(
-            line, lambda: self._process_line(line)
-        )
+        cached_result = self._cache_manager.get(line)
+        if cached_result is not None:
+            return cached_result
 
-    def _process_line(self, line: str) -> str:
-        """Internal logic for processing a single log line with Drain."""
+        template = self._extract_template(line)
+        self._cache_manager.set(line, template)
+
+        self.save_cache()
+        return template
+
+    def process_batch(self, sentences: List[str]) -> List[str]:
+        if not sentences:
+            return []
+
+        results = []
+        cache_hits = 0
+        new_templates = {}
+
+        # 预处理：去重和清理
+        unique_sentences = {}
+        for i, sentence in enumerate(sentences):
+            line = str(sentence).strip()
+            if not line:
+                results.append("")
+                continue
+
+            if line not in unique_sentences:
+                unique_sentences[line] = []
+            unique_sentences[line].append(i)
+
+        # 初始化结果数组
+        results = [""] * len(sentences)
+
+        # 批量查找缓存
+        for line, indices in unique_sentences.items():
+            cached_result = self._cache_manager.get(line)
+            if cached_result is not None:
+                cache_hits += len(indices)
+                for idx in indices:
+                    results[idx] = cached_result
+            else:
+                # 处理新的模板
+                template = self._extract_template(line)
+                new_templates[line] = template
+                for idx in indices:
+                    results[idx] = template
+
+        # 批量更新缓存
+        if new_templates:
+            for line, template in new_templates.items():
+                self._cache_manager.set(line, template)
+
+        if new_templates:
+            self.save_cache()
+
+        return results
+
+    def _extract_template(self, line: str) -> str:
         result = self._template_miner.add_log_message(line)
         template = result.get("template_mined")
         if template is None:
-            logging.warning(
-                f"Failed to find 'template_mined' for line: {line}. Result: {result}"
-            )
-            return ""  # Return a default or empty template
+            logger.warning(f"Failed to extract template for: {line}")
+            return ""
         return template
 
     def save_cache(self):
         self._cache_manager.save()
-
-
-class LogDataset(RCABenchDataset):
-    def __init__(
-        self,
-        paths: list[Path],
-        cache_dir: str = "./cache",
-        max_workers: Optional[int] = None,
-    ):
-        # Initialize drain and encoder before calling super()
-        self._drain = DrainProcesser(
-            "dataset/drain3/drain.ini", "data/gaia/drain.bin", f"{cache_dir}/drain"
-        )
-
-        super().__init__(
-            paths,
-            transform=self._transform_log,
-            cache_dir=cache_dir,
-            cache_name="dataset_log",
-            use_dataset_cache=True,
-            max_workers=max_workers,
-        )
-
-    def _save_all_caches(self):
-        """A single place to save all underlying caches."""
-        super()._save_all_caches()
-        self._drain.save_cache()
-        self._encoder.save_cache()
-
-    def _transform_log(self, data_pack: Path) -> tuple:
-        """The core transformation logic for a single log data pack."""
-        fs = derive_filename(data_pack)
-        if "abnormal_log" not in fs or not os.path.exists(fs["abnormal_log"]):
-            raise FileNotFoundError(f"Abnormal log file not found for {data_pack.name}")
-        if "injection" not in fs or not os.path.exists(fs["injection"]):
-            raise FileNotFoundError(f"Injection file not found for {data_pack.name}")
-
-        df = pd.read_parquet(fs["abnormal_log"])
-        df = df[df["service_name"] != "ts-ui-dashboard"].sort_values(by="time")
-        fault_type, target_service = load_injection_data(str(fs["injection"]))
-
-        df["time_bucket"] = pd.to_datetime(df["time"], unit="s").dt.floor("min")
-
-        # Process logs minute by minute
-        seqs, cnt_of_log = [], {}
-        for minute, group in df.groupby("time_bucket"):
-            templates = [self._drain(log) for log in group["message"]]
-            seqs.append(list(set(templates)))
-            for template in templates:
-                cnt_of_log.setdefault(template, [0] * len(df["time_bucket"].unique()))[
-                    len(seqs) - 1
-                ] += 1
-
-        # Calculate weights for each log template based on frequency change
-        wei_of_log = {}
-        total_gap = 1e-5
-        for template, counts in cnt_of_log.items():
-            log_counts = np.log(np.array(counts) + 1e-5)
-            change = np.abs(np.diff(np.insert(log_counts, 0, 0)))
-            gap = change.max() - change.mean()
-            wei_of_log[template] = gap
-            total_gap += gap
-
-        # Encode all unique templates
-        all_templates = list(set(t for seq in seqs for t in seq))
-        template_embeddings = self._encoder.batch_encode(all_templates, batch_size=64)
-        template_to_embedding = {
-            t: np.array(e) for t, e in zip(all_templates, template_embeddings)
-        }
-
-        # Create weighted sequence representations
-        final_sequence = []
-        for seq in seqs:
-            repr_vec = np.zeros(self._encoder._model.config.hidden_size)
-            for template in seq:
-                if template in template_to_embedding:
-                    repr_vec += (
-                        wei_of_log[template] / total_gap
-                    ) * template_to_embedding[template]
-            final_sequence.append(repr_vec.tolist())
-
-        labels = {"fault_type": fault_type, "target_service": target_service}
-        return final_sequence, labels
 
 
 def preprocess_logs(
@@ -185,10 +136,8 @@ def preprocess_logs(
     Returns:
         处理后的DataFrame列表
     """
-    # 初始化处理器
-    drain = DrainProcesser(
-        "dataset/drain3/drain.ini", "data/gaia/drain.bin", f"{cache_dir}/drain"
-    )
+
+    drain = DrainProcessor(conf="/home/nn/workspace/DiagFusion/drain.ini", save_path="cache/drain/temp")
 
     # 存储每个data_pack的日志序列
     log_sequences = []
@@ -222,7 +171,7 @@ def preprocess_logs(
     message_to_template = {}
     message_to_template_id = {}
     for msg in unique_messages:
-        template = drain(msg)
+        template = drain.process(msg)
         template_id = generate_template_id(template)
         message_to_template[msg] = template
         message_to_template_id[msg] = template_id
@@ -270,9 +219,7 @@ def preprocess_logs_inference(
         处理后的DataFrame列表
     """
     # 初始化处理器
-    drain = DrainProcesser(
-        "dataset/drain3/drain.ini", "data/gaia/drain.bin", f"{cache_dir}/drain"
-    )
+    drain = DrainProcessor(conf="/home/nn/workspace/DiagFusion/drain.ini", save_path="cache/drain/temp")
 
     # 存储每个data_pack的日志序列
     log_sequences = []
@@ -294,7 +241,7 @@ def preprocess_logs_inference(
     message_to_template = {}
     message_to_template_id = {}
     for msg in unique_messages:
-        template = drain(msg)
+        template = drain.process(msg)
         template_id = generate_template_id(template)
         message_to_template[msg] = template
         message_to_template_id[msg] = template_id
@@ -330,7 +277,8 @@ def generate_template_id(template: str) -> str:
     Returns:
         8位的十六进制哈希值
     """
-    hash_value = abs(hash(template))
-    hex_str = hex(hash_value)[2:]  # 去掉'0x'前缀
-    # 如果长度不足8位，在前面补0；如果超过8位，取后8位
-    return hex_str.zfill(8)[-8:]
+    import hashlib
+    # 使用MD5生成确定性哈希，确保相同模板总是产生相同ID
+    hash_value = hashlib.md5(template.encode('utf-8')).hexdigest()
+    # 取前8位作为模板ID
+    return hash_value[:8]

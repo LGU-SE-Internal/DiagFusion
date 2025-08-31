@@ -2,17 +2,25 @@
     // Use IntelliSense to learn about possible attributes.
     // Hover to view descriptions of existing attributes.
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid":"830387
-    // "version": "0.2.0",
-    // "configurations": [
-    //     {
-    //         "name": "Python Debugger: Current File with Arguments",
-    //         "type": "debugpy",
-    //         "request": "launch",
-    //         "program": "${file}",
-    //         "console": "integratedTerminal",
-    //         "args": " --config gaia_config2.yaml"
-    //     }
-    // ]
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python Debugger: Current File with Arguments",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": " --config gaia_config2.yaml",
+            "env": {
+                "CHECKPOINT_PATH": "./data/middle/checkpoints/service_model.pt",
+                "DYNACONF_PATHS__METADATA": "./data/middle/metadata",
+                "DYNACONF_PATHS__CKPT": "./data/middle/checkpoints",
+                "RCABENCH_BASE_URL": "http://10.10.10.220:32080",
+                "RCABENCH_USERNAME": "admin",
+                "RCABENCH_PASSWORD": "admin123"
+            }
+        }
+    ]
     // "version": "0.2.0",
     // "configurations": [
     //     {
@@ -26,24 +34,24 @@
     //         "subProcess": true
     //     }
     // ]
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "Run DiagFusion",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/run.py",
-            "console": "integratedTerminal",
-            "args": ["single-test", "--label", "train1"],
-            "env": {
-                "CHECKPOINT_PATH":"./data/middle/checkpoints/service_model.pt",
-                "DYNACONF_PATHS__METADATA":"./data/middle/metadata",
-                "DYNACONF_PATHS__CKPT":"./data/middle/checkpoints",
-                "RCABENCH_BASE_URL":"http://127.0.0.1:8082",
-                "RCABENCH_USERNAME":"admin",
-                "RCABENCH_PASSWORD":"admin123",
-            },
-            "sudo": true,
-        },
-    ]
+    // "version": "0.2.0",
+    // "configurations": [
+    //     {
+    //         "name": "Run DiagFusion",
+    //         "type": "debugpy",
+    //         "request": "launch",
+    //         "program": "${workspaceFolder}/run.py",
+    //         "console": "integratedTerminal",
+    //         "args": ["single-test", "--label", "train1"],
+    //         "env": {
+    //             "CHECKPOINT_PATH":"./data/middle/checkpoints/service_model.pt",
+    //             "DYNACONF_PATHS__METADATA":"./data/middle/metadata",
+    //             "DYNACONF_PATHS__CKPT":"./data/middle/checkpoints",
+    //             "RCABENCH_BASE_URL":"http://127.0.0.1:8082",
+    //             "RCABENCH_USERNAME":"admin",
+    //             "RCABENCH_PASSWORD":"admin123",
+    //         },
+    //         "sudo": true,
+    //     },
+    // ]
 }

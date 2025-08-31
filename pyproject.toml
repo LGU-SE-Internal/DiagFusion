@@ -16,10 +16,11 @@ dependencies = [
     "tqdm==4.67.1",
     "dgl==0.9.1",
     "fasttext==0.9.3",
-    "jsonpickle==2.2.0",
+    "jsonpickle",
     "loguru",
     "pyarrow",
     "rcabench-platform>=0.3.30",
     "rcabench>=1.1.30",
     "polars",
+    "drain3",
 ]

@@ -2,7 +2,6 @@ import os
 import sys
 
 import pandas as pd
-import typer
 
 from src.diagfusion.data.preprocessing import (
     run_fasttext,
