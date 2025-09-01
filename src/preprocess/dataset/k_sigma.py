@@ -13,7 +13,7 @@ class Ksigma:
             config["k_s"] = {}
             config["k_s"]["k_thr"] = 3
             config["k_s"]["std_thr"] = 0.1
-            config["k_s"]["win_size"] = 60  # 120
+            config["k_s"]["win_size"] = 20  # 120
         self.config = config
 
     def detection(self, data: pd.DataFrame, column: str, start_ts: int, end_ts: int):

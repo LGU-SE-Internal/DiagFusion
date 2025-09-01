@@ -141,6 +141,7 @@ def process_data(
     update_config_nodes()
 
     return trace_dict, processed_logs, injection_df, metric_dict
+    # return metric_dict
 
 
 def process_data_inference(

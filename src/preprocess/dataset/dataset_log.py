@@ -125,7 +125,7 @@ def preprocess_logs(
     data_paths: list[Path],
     cache_dir: str = "./cache",
     max_workers: Optional[int] = None,
-) -> list[pd.DataFrame]:
+) -> list[list]:
     """预处理日志数据的主函数
 
     Args:
@@ -134,15 +134,18 @@ def preprocess_logs(
         max_workers: 最大并行工作进程数
 
     Returns:
-        处理后的DataFrame列表
+        每个datapack对应的日志序列列表
     """
 
     drain = DrainProcessor(conf="/home/nn/workspace/DiagFusion/drain.ini", save_path="cache/drain/temp")
 
     # 存储每个data_pack的日志序列
-    log_sequences = []
-    lfs = []
-    for data_pack in data_paths:
+    all_log_sequences = []
+    
+    # 为每个datapack单独处理
+    for i, data_pack in enumerate(data_paths):
+        logger.info(f"正在处理数据包 {i+1}/{len(data_paths)}: {data_pack.name}")
+        
         # 获取相关文件路径
         fs = derive_filename(data_pack)
 
@@ -152,55 +155,58 @@ def preprocess_logs(
 
         # 读取并预处理数据
         lf = pl.scan_parquet(fs["abnormal_logs"])
-        lfs.append(lf)
-    lf = pl.concat(lfs)
-    lf = lf.filter(pl.col("service_name") != "ts-ui-dashboard").sort("time")
+        lf = lf.filter(pl.col("service_name") != "ts-ui-dashboard").sort("time")
 
-    # 时间转换为毫秒级时间戳
-    lf = lf.with_columns([
-        pl.col("time").dt.timestamp(time_unit="ms").alias("time")
-    ])
+        # 时间转换为毫秒级时间戳
+        lf = lf.with_columns([
+            pl.col("time").dt.timestamp(time_unit="ms").alias("time")
+        ])
 
-    # 提取日志模板并计算模板ID
-    df = lf.collect()
+        # 提取日志模板并计算模板ID
+        df = lf.collect()
 
-    # 获取唯一的消息
-    unique_messages = df["message"].unique().to_list()
+        # 获取当前datapack的唯一消息
+        unique_messages = df["message"].unique().to_list()
 
-    # 对唯一消息进行drain处理
-    message_to_template = {}
-    message_to_template_id = {}
-    for msg in unique_messages:
-        template = drain.process(msg)
-        template_id = generate_template_id(template)
-        message_to_template[msg] = template
-        message_to_template_id[msg] = template_id
+        # 对当前datapack的唯一消息进行drain处理
+        message_to_template = {}
+        message_to_template_id = {}
+        for msg in enumerate(unique_messages):
+            template = drain.process(msg)
+            template_id = generate_template_id(template)
+            message_to_template[msg] = template
+            message_to_template_id[msg] = template_id
 
-    # 映射回原始数据
-    df = df.with_columns([
-        pl.col("message").map_elements(lambda x: message_to_template[x], return_dtype=pl.Utf8).alias("template"),
-        pl.col("message").map_elements(lambda x: message_to_template_id[x], return_dtype=pl.Utf8).alias("template_id")
-    ])
+        # 映射回当前datapack的数据
+        df = df.with_columns([
+            pl.col("message").map_elements(lambda x: message_to_template[x], return_dtype=pl.Utf8).alias("template"),
+            pl.col("message").map_elements(lambda x: message_to_template_id[x], return_dtype=pl.Utf8).alias("template_id")
+        ])
 
-    # 将当前data_pack的日志转换为[time, service_name, template_id]格式的列表
-    log_sequences = df.select(["time", "service_name", "template_id"]).to_numpy().tolist()
-
+        # 将当前data_pack的日志转换为[time, service_name, template_id]格式的列表
+        log_sequence = df.select(["time", "service_name", "template_id"]).to_numpy().tolist()
+        all_log_sequences.append(log_sequence)
+        
+        logger.info(f"数据包 {data_pack.name} 处理完成，日志条数: {len(log_sequence)}")
+        if log_sequence:
+            logger.info(f"示例日志: {log_sequence[0]}")
 
     # 保存缓存
     drain.save_cache()
 
-    # 保存为npy文件
+    # 保存为npy文件，现在包含多个独立的列表
     save_path = Path(
         "./data/rcabench/demo/demo2/anomalies/stratification_logs.npy"
     ).resolve()
     # 确保目录存在
     save_path.parent.mkdir(parents=True, exist_ok=True)
-    np.save(str(save_path), np.array(log_sequences, dtype=object))
+    np.save(str(save_path), np.array(all_log_sequences, dtype=object))
 
-    logger.success(f"已保存日志序列，形状: {len(log_sequences)}")
-    logger.info(f"第一个序列示例: {log_sequences[0][:3]}")
+    logger.success(f"已保存 {len(all_log_sequences)} 个数据包的日志序列")
+    for i, log_seq in enumerate(all_log_sequences):
+        logger.info(f"数据包 {i+1} 日志条数: {len(log_seq)}")
 
-    return log_sequences
+    return all_log_sequences
 
 
 def preprocess_logs_inference(

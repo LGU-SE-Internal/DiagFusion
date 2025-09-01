@@ -12,6 +12,7 @@ from src.utils.logger import logger
 def process_parquet_files(data_paths: list[Path]):
     # 初始化 K-sigma 检测器
     detector = Ksigma()
+    processed_dict = {}
 
     # 存储所有结果,按case_id分组
     case_dict = {}
@@ -45,38 +46,80 @@ def process_parquet_files(data_paths: list[Path]):
             # 读取 parquet 文件
             df = pd.read_parquet(parquet_file)
 
+            # 转换时间戳
+            df["timestamp"] = df["time"].apply(
+                lambda x: (
+                    int(x.timestamp() * 1000)
+                    if hasattr(x, "timestamp")
+                    else int(x / 1000)
+                )
+            )
+
             # 确保数据框包含必要的列
-            if "time" not in df.columns or "value" not in df.columns:
+            if "timestamp" not in df.columns or "value" not in df.columns:
                 logger.warning(f"跳过 {data_pack.name}: 缺少必要的列")
                 continue
 
-            metric_name = df["metric"].iloc[0]  # 从数据中获取metric字段的值
-            service_name = df["service_name"].iloc[0]
+            # metric_name = df["metric"].iloc[0]  # 从数据中获取metric字段的值
+            # service_name = df["service_name"].iloc[0]
             # 对数据进行排序
-            df = df.sort_values("time")
+            df = df.sort_values("timestamp")
 
             # 获取时间范围
-            start_ts = df["time"].min()
-            end_ts = df["time"].max()
+            # start_ts = df["timestamp"].min()
+            # end_ts = df["timestamp"].max()
 
-            # 使用 K-sigma 进行检测
-            is_anomalous, anomaly_ts, anomaly_score = detector.detection(
-                data=df, column="value", start_ts=start_ts, end_ts=end_ts
-            )
+            scores = []
+            for name, group in df.groupby(
+                    ["metric", "service_name"]
+                ):
+                    group = group.sort_values("timestamp")
+                    if len(group) > 0:
+                        is_anomaly, _, score = detector.detection(
+                            data=pd.DataFrame(
+                                {
+                                    "time": group["timestamp"].values,
+                                    "value": group["value"].values,
+                                }
+                            ),
+                            column="value",
+                            start_ts=group["timestamp"].min(),
+                            end_ts=group["timestamp"].max(),
+                        )
+                        scores.extend([abs(score) if is_anomaly else 0] * len(group))
+                    else:
+                        scores.extend([0] * len(group))
 
-            # 如果检测到异常,添加到对应case_id的列表中
-            if is_anomalous:
-                # 如果这个case_id还没有对应的列表,创建一个
-                if str(case_id) not in case_dict:
-                    case_dict[str(case_id)] = []
+            df["score"] = scores
 
-                # 添加异常数据
-                case_dict[str(case_id)].append(
-                    [int(anomaly_ts), instance_id, metric_name, float(anomaly_score)]
-                )
+            metric_records = df[
+                ["timestamp", "service_name", "metric", "score"]
+            ].values.tolist()
+
+            if metric_records:
+                processed_dict[str(case_id)] = metric_records
                 logger.info(
-                    f"已处理完成 case {case_id}, 检测到异常，score: {anomaly_score:.4f}"
+                    f"已处理完成 case {case_id}，生成 {len(metric_records)} 条记录"
                 )
+
+            # # 使用 K-sigma 进行检测
+            # is_anomalous, anomaly_ts, anomaly_score = detector.detection(
+            #     data=df, column="value", start_ts=start_ts, end_ts=end_ts
+            # )
+
+            # # 如果检测到异常,添加到对应case_id的列表中
+            # if is_anomalous:
+            #     # 如果这个case_id还没有对应的列表,创建一个
+            #     if str(case_id) not in case_dict:
+            #         case_dict[str(case_id)] = []
+
+            #     # 添加异常数据
+            #     case_dict[str(case_id)].append(
+            #         [int(anomaly_ts), instance_id, metric_name, float(anomaly_score)]
+            #     )
+            #     logger.info(
+            #         f"已处理完成 case {case_id}, 检测到异常，score: {anomaly_score:.4f}"
+            #     )
 
         except Exception as e:
             logger.error(f"处理 {data_pack.name} 时出错: {str(e)}")
@@ -87,12 +130,12 @@ def process_parquet_files(data_paths: list[Path]):
     output_file.parent.mkdir(parents=True, exist_ok=True)
 
     with open(output_file, "w") as f:
-        json.dump(case_dict, f, indent=4)
+        json.dump(processed_dict, f, indent=4)
 
     logger.success(f"处理完成，结果已保存到: {output_file}")
     logger.info(f"共处理了 {len(case_dict)} 个case")
 
-    return case_dict
+    return processed_dict
 
 
 def process_parquet_files_inference(data_path: Path, output_path: Path):

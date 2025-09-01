@@ -75,7 +75,7 @@ def main(dataset_id: int = None):
         "dropout": 0.1,
     }
 
-    process_data(data_paths, config, cache_dir="./cache")
+    process_data(data_paths[:100], config, cache_dir="./cache")
 
 
 if __name__ == "__main__":
