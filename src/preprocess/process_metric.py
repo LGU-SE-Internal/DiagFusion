@@ -153,42 +153,55 @@ def process_parquet_files_inference(data_path: Path, output_path: Path):
 
     df = pd.read_parquet(parquet_file)
 
-    metric_name = df["metric"].iloc[0]  # 从数据中获取metric字段的值
-    # 对数据进行排序
-    df = df.sort_values("time")
-
-    # 获取时间范围
-    start_ts = df["time"].min()
-    end_ts = df["time"].max()
-
-    # 使用 K-sigma 进行检测
-    is_anomalous, anomaly_ts, anomaly_score = detector.detection(
-        data=df, column="value", start_ts=start_ts, end_ts=end_ts
-    )
-
-    # 如果检测到异常,添加到对应case_id的列表中
-    if is_anomalous:
-        # 如果这个case_id还没有对应的列表,创建一个
-        if str(0) not in case_dict:
-            case_dict[str(0)] = []
-
-        # 添加异常数据
-        case_dict[str(0)].append(
-            [int(anomaly_ts), "service", metric_name, float(anomaly_score)]
+    # 转换时间戳
+    df["timestamp"] = df["time"].apply(
+        lambda x: (
+            int(x.timestamp() * 1000)
+            if hasattr(x, "timestamp")
+            else int(x / 1000)
         )
-        logger.info(f"已处理完成 case {0}, 检测到异常，score: {anomaly_score:.4f}")
+    )
+    # 对数据进行排序
+    df = df.sort_values("timestamp")
+
+
+    scores = []
+    for name, group in df.groupby(
+            ["metric", "service_name"]
+        ):
+            group = group.sort_values("timestamp")
+            if len(group) > 0:
+                is_anomaly, _, score = detector.detection(
+                    data=pd.DataFrame(
+                        {
+                            "time": group["timestamp"].values,
+                            "value": group["value"].values,
+                        }
+                    ),
+                    column="value",
+                    start_ts=group["timestamp"].min(),
+                    end_ts=group["timestamp"].max(),
+                )
+                scores.extend([abs(score) if is_anomaly else 0] * len(group))
+            else:
+                scores.extend([0] * len(group))
+
+    df["score"] = scores
+
+    metric_records = df[
+            ["timestamp", "service_name", "metric", "score"]
+        ].values.tolist()
 
     # 设置输出路径并确保目录存在
     output_file = os.path.join(output_path, "demo_metric.json")
     os.makedirs(os.path.dirname(output_file), exist_ok=True)
 
     with open(output_file, "w") as f:
-        json.dump(case_dict, f, indent=4)
+        json.dump(metric_records, f, indent=4)
 
     logger.success(f"处理完成，结果已保存到: {output_file}")
-    logger.info(f"共处理了 {len(case_dict)} 个case")
 
-    return case_dict
+    return metric_records
 
 
 def derive_filename(data_pack: Path) -> dict:

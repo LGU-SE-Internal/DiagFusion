@@ -25,7 +25,7 @@ def train(
 ):
     logger.info("[Data Preprocess]")
     logger.info("[Get Data]")
-    get_data_main(dataset_id)
+    # get_data_main(dataset_id)
     # 1. 处理数据
     logger.info("[diagfusion]")
     # diagfusion

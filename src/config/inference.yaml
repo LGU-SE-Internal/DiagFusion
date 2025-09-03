@@ -13,7 +13,12 @@ fasttext:
     ts-auth-service ts-seat-service ts-order-service ts-voucher-service ts-travel2-service
     ts-preserve-service ts-route-service ts-consign-price-service ts-inside-payment-service
     ts-verification-code-service ts-consign-service ts-train-service ts-user-service
-    ts-preserve-other-service ts-price-service ts-ticket-office-service
+    ts-preserve-other-service ts-price-service ts-ticket-office-service ts-station-service
+    ts-notification-service ts-config-service ts-payment-service ts-assurance-service
+    ts-execute-service ts-wait-order-service ts-train-food-service ts-cancel-service
+    ts-rabbitmq ts-rebook-service ts-station-food-service ts-contacts-service ts-food-delivery-service
+    ts-admin-basic-info-service ts-admin-user-service ts-admin-order-service ts-admin-route-service
+    ts-avatar-service
   sample_count: 1000
   save_path: fasttext/event_embedding.pkl
   supervised: true
@@ -24,7 +29,7 @@ fasttext:
   train_path: fasttext/temp/train.txt
   vector_dim: 100
 he_dgl:
-  N_S: 25
+  N_S: 44
 label: demo2
 parse:
   inference: true
@@ -35,7 +40,12 @@ parse:
     ts-auth-service ts-seat-service ts-order-service ts-voucher-service ts-travel2-service
     ts-preserve-service ts-route-service ts-consign-price-service ts-inside-payment-service
     ts-verification-code-service ts-consign-service ts-train-service ts-user-service
-    ts-preserve-other-service ts-price-service ts-ticket-office-service
+    ts-preserve-other-service ts-price-service ts-ticket-office-service ts-station-service
+    ts-notification-service ts-config-service ts-payment-service ts-assurance-service
+    ts-execute-service ts-wait-order-service ts-train-food-service ts-cancel-service
+    ts-rabbitmq ts-rebook-service ts-station-food-service ts-contacts-service ts-food-delivery-service
+    ts-admin-basic-info-service ts-admin-user-service ts-admin-order-service ts-admin-route-service
+    ts-avatar-service
   parse_dir: parse
   save_path: parse/stratification_texts.pkl
   trace_path: anomalies/demo_trace.json

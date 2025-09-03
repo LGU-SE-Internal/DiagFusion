@@ -19,6 +19,22 @@
                 "RCABENCH_USERNAME": "admin",
                 "RCABENCH_PASSWORD": "admin123"
             }
+        },
+        {
+            "name": "Python Debugger: Test",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": " batch-test --label 8.26run",
+            "env": {
+                "CHECKPOINT_PATH": "./data/middle/checkpoints/service_model.pt",
+                "DYNACONF_PATHS__METADATA": "./data/middle/metadata",
+                "DYNACONF_PATHS__CKPT": "./data/middle/checkpoints",
+                "RCABENCH_BASE_URL": "http://10.10.10.220:32080",
+                "RCABENCH_USERNAME": "admin",
+                "RCABENCH_PASSWORD": "admin123"
+            }
         }
     ]
     // "version": "0.2.0",
