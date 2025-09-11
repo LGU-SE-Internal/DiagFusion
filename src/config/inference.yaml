@@ -8,17 +8,13 @@ fasttext:
   epoch: 5
   fasttext_dir: fasttext
   minCount: 1
-  nodes: ts-travel-plan-service ts-order-other-service ts-ui-dashboard ts-security-service
-    ts-basic-service ts-route-plan-service ts-food-service mysql ts-travel-service
-    ts-auth-service ts-seat-service ts-order-service ts-voucher-service ts-travel2-service
-    ts-preserve-service ts-route-service ts-consign-price-service ts-inside-payment-service
-    ts-verification-code-service ts-consign-service ts-train-service ts-user-service
-    ts-preserve-other-service ts-price-service ts-ticket-office-service ts-station-service
-    ts-notification-service ts-config-service ts-payment-service ts-assurance-service
-    ts-execute-service ts-wait-order-service ts-train-food-service ts-cancel-service
-    ts-rabbitmq ts-rebook-service ts-station-food-service ts-contacts-service ts-food-delivery-service
-    ts-admin-basic-info-service ts-admin-user-service ts-admin-order-service ts-admin-route-service
-    ts-avatar-service
+  nodes: ts-basic-service ts-preserve-service ts-route-plan-service ts-auth-service
+    ts-security-service mysql ts-travel-service ts-food-service ts-station-service
+    ts-order-service ts-travel2-service ts-train-food-service ts-route-service ts-ui-dashboard
+    ts-consign-price-service ts-inside-payment-service ts-order-other-service ts-seat-service
+    ts-consign-service ts-train-service ts-user-service ts-travel-plan-service ts-config-service
+    ts-price-service ts-payment-service ts-assurance-service ts-station-food-service
+    ts-verification-code-service ts-contacts-service
   sample_count: 1000
   save_path: fasttext/event_embedding.pkl
   supervised: true
@@ -29,23 +25,19 @@ fasttext:
   train_path: fasttext/temp/train.txt
   vector_dim: 100
 he_dgl:
-  N_S: 44
+  N_S: 29
 label: demo2
 parse:
   inference: true
   log_path: anomalies/stratification_logs.npy
   metric_path: anomalies/demo_metric.json
-  nodes: ts-travel-plan-service ts-order-other-service ts-ui-dashboard ts-security-service
-    ts-basic-service ts-route-plan-service ts-food-service mysql ts-travel-service
-    ts-auth-service ts-seat-service ts-order-service ts-voucher-service ts-travel2-service
-    ts-preserve-service ts-route-service ts-consign-price-service ts-inside-payment-service
-    ts-verification-code-service ts-consign-service ts-train-service ts-user-service
-    ts-preserve-other-service ts-price-service ts-ticket-office-service ts-station-service
-    ts-notification-service ts-config-service ts-payment-service ts-assurance-service
-    ts-execute-service ts-wait-order-service ts-train-food-service ts-cancel-service
-    ts-rabbitmq ts-rebook-service ts-station-food-service ts-contacts-service ts-food-delivery-service
-    ts-admin-basic-info-service ts-admin-user-service ts-admin-order-service ts-admin-route-service
-    ts-avatar-service
+  nodes: ts-basic-service ts-preserve-service ts-route-plan-service ts-auth-service
+    ts-security-service mysql ts-travel-service ts-food-service ts-station-service
+    ts-order-service ts-travel2-service ts-train-food-service ts-route-service ts-ui-dashboard
+    ts-consign-price-service ts-inside-payment-service ts-order-other-service ts-seat-service
+    ts-consign-service ts-train-service ts-user-service ts-travel-plan-service ts-config-service
+    ts-price-service ts-payment-service ts-assurance-service ts-station-food-service
+    ts-verification-code-service ts-contacts-service
   parse_dir: parse
   save_path: parse/stratification_texts.pkl
   trace_path: anomalies/demo_trace.json

@@ -1,49 +1,34 @@
 {
     "service_id_to_name": {
-        "0": "ts-travel-plan-service",
-        "1": "ts-order-other-service",
-        "2": "ts-ui-dashboard",
-        "3": "ts-security-service",
-        "4": "ts-basic-service",
-        "5": "ts-route-plan-service",
-        "6": "ts-food-service",
-        "7": "mysql",
-        "8": "ts-travel-service",
-        "9": "ts-auth-service",
-        "10": "ts-seat-service",
-        "11": "ts-order-service",
-        "12": "ts-voucher-service",
-        "13": "ts-travel2-service",
-        "14": "ts-preserve-service",
-        "15": "ts-route-service",
-        "16": "ts-consign-price-service",
-        "17": "ts-inside-payment-service",
-        "18": "ts-verification-code-service",
-        "19": "ts-consign-service",
-        "20": "ts-train-service",
-        "21": "ts-user-service",
-        "22": "ts-preserve-other-service",
+        "0": "ts-basic-service",
+        "1": "ts-preserve-service",
+        "2": "ts-route-plan-service",
+        "3": "ts-auth-service",
+        "4": "ts-security-service",
+        "5": "mysql",
+        "6": "ts-travel-service",
+        "7": "ts-food-service",
+        "8": "ts-station-service",
+        "9": "ts-order-service",
+        "10": "ts-travel2-service",
+        "11": "ts-train-food-service",
+        "12": "ts-route-service",
+        "13": "ts-ui-dashboard",
+        "14": "ts-consign-price-service",
+        "15": "ts-inside-payment-service",
+        "16": "ts-order-other-service",
+        "17": "ts-seat-service",
+        "18": "ts-consign-service",
+        "19": "ts-train-service",
+        "20": "ts-user-service",
+        "21": "ts-travel-plan-service",
+        "22": "ts-config-service",
         "23": "ts-price-service",
-        "24": "ts-ticket-office-service",
-        "25": "ts-station-service",
-        "26": "ts-notification-service",
-        "27": "ts-config-service",
-        "28": "ts-payment-service",
-        "29": "ts-assurance-service",
-        "30": "ts-execute-service",
-        "31": "ts-wait-order-service",
-        "32": "ts-train-food-service",
-        "33": "ts-cancel-service",
-        "34": "ts-rabbitmq",
-        "35": "ts-rebook-service",
-        "36": "ts-station-food-service",
-        "37": "ts-contacts-service",
-        "38": "ts-food-delivery-service",
-        "39": "ts-admin-basic-info-service",
-        "40": "ts-admin-user-service",
-        "41": "ts-admin-order-service",
-        "42": "ts-admin-route-service",
-        "43": "ts-avatar-service"
+        "24": "ts-payment-service",
+        "25": "ts-assurance-service",
+        "26": "ts-station-food-service",
+        "27": "ts-verification-code-service",
+        "28": "ts-contacts-service"
     },
     "service_instance_map": {
         "0": [
@@ -132,97 +117,37 @@
         ],
         "28": [
             28
-        ],
-        "29": [
-            29
-        ],
-        "30": [
-            30
-        ],
-        "31": [
-            31
-        ],
-        "32": [
-            32
-        ],
-        "33": [
-            33
-        ],
-        "34": [
-            34
-        ],
-        "35": [
-            35
-        ],
-        "36": [
-            36
-        ],
-        "37": [
-            37
-        ],
-        "38": [
-            38
-        ],
-        "39": [
-            39
-        ],
-        "40": [
-            40
-        ],
-        "41": [
-            41
-        ],
-        "42": [
-            42
-        ],
-        "43": [
-            43
         ]
     },
     "instance_to_id": {
-        "ts-travel-plan-service": 0,
-        "ts-order-other-service": 1,
-        "ts-ui-dashboard": 2,
-        "ts-security-service": 3,
-        "ts-basic-service": 4,
-        "ts-route-plan-service": 5,
-        "ts-food-service": 6,
-        "mysql": 7,
-        "ts-travel-service": 8,
-        "ts-auth-service": 9,
-        "ts-seat-service": 10,
-        "ts-order-service": 11,
-        "ts-voucher-service": 12,
-        "ts-travel2-service": 13,
-        "ts-preserve-service": 14,
-        "ts-route-service": 15,
-        "ts-consign-price-service": 16,
-        "ts-inside-payment-service": 17,
-        "ts-verification-code-service": 18,
-        "ts-consign-service": 19,
-        "ts-train-service": 20,
-        "ts-user-service": 21,
-        "ts-preserve-other-service": 22,
+        "ts-basic-service": 0,
+        "ts-preserve-service": 1,
+        "ts-route-plan-service": 2,
+        "ts-auth-service": 3,
+        "ts-security-service": 4,
+        "mysql": 5,
+        "ts-travel-service": 6,
+        "ts-food-service": 7,
+        "ts-station-service": 8,
+        "ts-order-service": 9,
+        "ts-travel2-service": 10,
+        "ts-train-food-service": 11,
+        "ts-route-service": 12,
+        "ts-ui-dashboard": 13,
+        "ts-consign-price-service": 14,
+        "ts-inside-payment-service": 15,
+        "ts-order-other-service": 16,
+        "ts-seat-service": 17,
+        "ts-consign-service": 18,
+        "ts-train-service": 19,
+        "ts-user-service": 20,
+        "ts-travel-plan-service": 21,
+        "ts-config-service": 22,
         "ts-price-service": 23,
-        "ts-ticket-office-service": 24,
-        "ts-station-service": 25,
-        "ts-notification-service": 26,
-        "ts-config-service": 27,
-        "ts-payment-service": 28,
-        "ts-assurance-service": 29,
-        "ts-execute-service": 30,
-        "ts-wait-order-service": 31,
-        "ts-train-food-service": 32,
-        "ts-cancel-service": 33,
-        "ts-rabbitmq": 34,
-        "ts-rebook-service": 35,
-        "ts-station-food-service": 36,
-        "ts-contacts-service": 37,
-        "ts-food-delivery-service": 38,
-        "ts-admin-basic-info-service": 39,
-        "ts-admin-user-service": 40,
-        "ts-admin-order-service": 41,
-        "ts-admin-route-service": 42,
-        "ts-avatar-service": 43
+        "ts-payment-service": 24,
+        "ts-assurance-service": 25,
+        "ts-station-food-service": 26,
+        "ts-verification-code-service": 27,
+        "ts-contacts-service": 28
     }
 }

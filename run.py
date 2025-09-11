@@ -214,10 +214,10 @@ def run_batch(
         total_walltime = t1 - t0
         avg_walltime = total_walltime / len(tasks)
 
-        logger.debug(f"Total   walltime: {total_walltime:.3f} seconds")
-        logger.debug(f"Average walltime: {avg_walltime:.3f} seconds")
+        logger.info(f"Total   walltime: {total_walltime:.3f} seconds")
+        logger.info(f"Average walltime: {avg_walltime:.3f} seconds")
 
-        logger.debug(f"Finished running algorithm `{algorithm}` on dataset `{dataset}`")
+        logger.info(f"Finished running algorithm `{algorithm}` on dataset `{dataset}`")
 
         sys.stdout.flush()
 
@@ -237,7 +237,7 @@ def single_test(
 
 @app.command()
 def batch_test(label: str | None = None):
-    run_batch(algorithm=diagfusion, algorithm_id=75, datasets=[18], label=label)
+    run_batch(algorithm=diagfusion, algorithm_id=75, datasets=[21], label=label)
 
 
 if __name__ == "__main__":

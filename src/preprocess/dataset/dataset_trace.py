@@ -111,14 +111,21 @@ def preprocess_trace_data(paths: list[Path], cache_dir: str = "./cache") -> dict
                             start_ts=group["timestamp"].min(),
                             end_ts=group["timestamp"].max(),
                         )
-                        scores.extend([abs(score) if is_anomaly else 0] * len(group))
+                        # 只保留每个(service_name, parent_service)一条记录
+                        scores.append(abs(score) if is_anomaly else 0)
                     else:
-                        scores.extend([0] * len(group))
+                        scores.append(0)
 
-                abnormal_trace_df["score"] = scores
+                # 只保留每个(service_name, parent_service)一条记录
+                unique_pairs = (
+                    abnormal_trace_df.groupby(["service_name", "parent_service"])
+                    .first()
+                    .reset_index()
+                )
+                unique_pairs["score"] = scores
 
                 # 提取需要的列并转换为列表格式
-                trace_records = abnormal_trace_df[
+                trace_records = unique_pairs[
                     ["timestamp", "parent_service", "service_name", "score"]
                 ].values.tolist()
 
@@ -126,12 +133,13 @@ def preprocess_trace_data(paths: list[Path], cache_dir: str = "./cache") -> dict
                 if trace_records:
                     processed_dict[str(case_id)] = trace_records
                     logger.info(
-                        f"已处理完成 case {case_id}，生成 {len(trace_records)} 条记录"
+                        f"已处理完成 case {case_id}，生成 {len(trace_records)} 条唯一(service_name-parent_service)记录"
                     )
 
                 # 及时释放内存
                 del abnormal_trace_df
                 del scores
+                del unique_pairs
 
             except Exception as e:
                 logger.error(f"处理 case {case_id} 时出错: {str(e)}")

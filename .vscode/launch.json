@@ -26,7 +26,8 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "args": " batch-test --label 8.26run",
+            "args": " batch-test --label 9.10run",
+            "justMyCode": false,
             "env": {
                 "CHECKPOINT_PATH": "./data/middle/checkpoints/service_model.pt",
                 "DYNACONF_PATHS__METADATA": "./data/middle/metadata",

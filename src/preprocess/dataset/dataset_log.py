@@ -136,7 +136,16 @@ def process_datapack(data_pack: Path) -> list:
 
     # 读取并预处理数据
     lf = pl.scan_parquet(fs["abnormal_logs"])
-    lf = lf.filter(pl.col("service_name") != "ts-ui-dashboard").sort("time")
+    # 统计原始日志条数
+    original_count = lf.select(pl.count()).collect().item()
+    # 过滤掉 service_name 为 ts-ui-dashboard 的日志，并且过滤掉 level 为 INFO 的日志
+    lf_filtered = lf.filter(
+        (pl.col("service_name") != "ts-ui-dashboard") & (pl.col("level") != "INFO")
+    ).sort("time")
+    # 统计过滤后日志条数
+    filtered_count = lf_filtered.select(pl.count()).collect().item()
+    print(f"原始日志条数: {original_count}，过滤后日志条数: {filtered_count}")
+    lf = lf_filtered
 
     # 时间转换为毫秒级时间戳
     lf = lf.with_columns([
@@ -308,8 +317,6 @@ def preprocess_logs_inference(
     # 将当前data_pack的日志转换为[time, service_name, template_id]格式的列表
     log_sequences = df.select(["time", "service_name", "template_id"]).to_numpy().tolist()
 
-    # 保存缓存
-    drain.save_cache()
 
     save_path = os.path.join(output_path, "stratification_logs.npy")
     # 确保目录存在

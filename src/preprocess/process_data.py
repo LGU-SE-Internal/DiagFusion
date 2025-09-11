@@ -96,7 +96,7 @@ def preprocess_injection(
 
     # 添加data_type列,按7:3比例划分训练集和测试集
     n = len(df)
-    train_size = int(n * 0.7)  # 70%作为训练集
+    train_size = int(n * 0.9)  # 70%作为训练集
     df["data_type"] = ["train"] * train_size + ["test"] * (n - train_size)
 
     df.to_csv(output_path, index=False)
@@ -126,22 +126,22 @@ def process_data(
         - metric_dict: 指标数据字典
     """
 
-    # 预处理日志数据
-    processed_logs = preprocess_logs(data_paths, cache_dir)
+    # # 预处理日志数据
+    # processed_logs = preprocess_logs(data_paths, cache_dir)
 
-    # 处理注入信息
-    injection_df = preprocess_injection(data_paths)
+    # # 处理注入信息
+    # injection_df = preprocess_injection(data_paths)
 
-    # 处理指标数据
-    metric_dict = process_parquet_files(data_paths)
+    # # 处理指标数据
+    # metric_dict = process_parquet_files(data_paths)
 
     # 处理trace数据
     trace_dict = save_trace_data(data_paths)
 
     update_config_nodes()
 
-    return trace_dict, processed_logs, injection_df, metric_dict
-    # return metric_dict
+    # return trace_dict, processed_logs, injection_df, metric_dict
+    return trace_dict
 
 
 def process_data_inference(
