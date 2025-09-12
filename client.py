@@ -21,7 +21,7 @@ from src.preprocess.get_data import main as get_data_main
 
 
 def train(
-    dataset_id: int =20
+    dataset_id: int =55
 ):
     logger.info("[Data Preprocess]")
     logger.info("[Get Data]")

@@ -47,6 +47,12 @@ def main(dataset_id: int = None):
 
         for datapack in datapacks_injections:
             injection_name = datapack.injection_name
+            
+            # Skip cases containing ui-dashboard
+            if "ui-dashboard" in injection_name:
+                logger.info(f"Skipping datapack containing ui-dashboard: {injection_name}")
+                continue
+                
             input_path = Path("data") / "rcabench_dataset" / injection_name
             converted_input_path = input_path / "converted"
 

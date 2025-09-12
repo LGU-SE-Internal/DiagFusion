@@ -219,6 +219,8 @@ class InferenceDataProcess:
         Xs = U.load_info("./data/inference/demo/demo2/sentence_embedding.pkl")
         Xs = np.array(Xs)
 
+        # Xs = np.random.randn(1, 29, 100)
+
         save_dir = "./data/inference/demo/demo2"
 
         # 直接保存所有特征向量作为测试数据
@@ -243,62 +245,8 @@ class InferenceDataProcess:
         #         logger.info(f"  - Min: {np.min(service_features):.6f}")
         #         logger.info(f"  - Max: {np.max(service_features):.6f}")
         #         logger.info(f"  - Non-zero count: {np.count_nonzero(service_features)}/{len(service_features)}")
-        #         logger.info(f"  - First 10 values: {service_features[:10]}")
+        #         logger.info(f"  - values: {service_features[:100]}")
                 
-        #     # 检查是否所有服务的特征都相同
-        #     logger.info("=== 检查服务间差异 ===")
-        #     all_services_same = True
-        #     first_service = Xs[0][0]
-        #     for service_idx in range(1, Xs[0].shape[0]):
-        #         if not np.array_equal(first_service, Xs[0][service_idx]):
-        #             all_services_same = False
-        #             diff = np.abs(first_service - Xs[0][service_idx])
-        #             logger.info(f"Service 0 vs Service {service_idx}:")
-        #             logger.info(f"  - Max difference: {np.max(diff):.6f}")
-        #             logger.info(f"  - Mean difference: {np.mean(diff):.6f}")
-        #             logger.info(f"  - Different elements: {np.count_nonzero(diff)}/{len(diff)}")
-        #         else:
-        #             logger.warning(f"⚠️  Service 0 and Service {service_idx} are IDENTICAL!")
-            
-        #     if all_services_same:
-        #         logger.error("🚨 所有服务的特征向量完全相同！这会导致GNN无法区分不同服务！")
-        #     else:
-        #         logger.info("✅ 不同服务的特征向量是不同的")
-                
-        #     # 检查特征向量是否全零或异常
-        #     logger.info("=== 检查特征向量质量 ===")
-        #     zero_services = []
-        #     constant_services = []
-        #     for service_idx in range(Xs[0].shape[0]):
-        #         service_features = Xs[0][service_idx]
-                
-        #         # 检查全零
-        #         if np.all(service_features == 0):
-        #             zero_services.append(service_idx)
-                
-        #         # 检查常数向量
-        #         if np.std(service_features) < 1e-8:
-        #             constant_services.append(service_idx)
-
-        #     if zero_services:
-        #         logger.warning(f"⚠️  发现全零服务特征: {zero_services}")
-        #     if constant_services:
-        #         logger.warning(f"⚠️  发现常数服务特征: {constant_services}")
-                
-        #     # 计算服务间相似度矩阵（前10个服务）
-        #     logger.info("=== 服务间余弦相似度（前10个服务）===")
-        #     from sklearn.metrics.pairwise import cosine_similarity
-        #     n_services_to_check = min(10, Xs[0].shape[0])
-        #     similarity_matrix = cosine_similarity(Xs[0][:n_services_to_check])
-            
-        #     logger.info("相似度矩阵对角线以上的值（1.0表示完全相同）:")
-        #     for i in range(n_services_to_check):
-        #         for j in range(i+1, n_services_to_check):
-        #             sim = similarity_matrix[i][j]
-        #             if sim > 0.99:
-        #                 logger.warning(f"  Service {i} vs {j}: {sim:.6f} (几乎相同!)")
-        #             elif sim > 0.95:
-        #                 logger.info(f"  Service {i} vs {j}: {sim:.6f} (很相似)")
 
 class FastTextLab_inference:
     def __init__(self, config, cases, split=True):
@@ -554,6 +502,7 @@ def metric_trace_log_parse(trace, metric, logs, labels, save_path, nodes):
 
 
 def metric_trace_log_parse_inference(trace, metric, logs, labels, save_path, nodes):
+    #labels.index = 100
     if not logs is None:
         logs = list(logs)
         log = {x: [] for x in labels.index}

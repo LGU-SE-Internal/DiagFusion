@@ -5,6 +5,7 @@ hawkes_service
 result
 wandb
 .cache
-data
 output
 temp
+rcabench
+rcabench_dataset

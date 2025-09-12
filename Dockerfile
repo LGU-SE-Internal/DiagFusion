@@ -32,6 +32,9 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 ENV PATH="/app/.venv/bin:$PATH"
 
+COPY entrypoint.sh /
+RUN chmod +x /entrypoint.sh
+
 COPY . .
 
 ENTRYPOINT ["bash", "entrypoint.sh"]

@@ -207,14 +207,22 @@ def preprocess_trace_data_inference(
                 start_ts=group["timestamp"].min(),
                 end_ts=group["timestamp"].max(),
             )
-            scores.extend([abs(score) if is_anomaly else 0] * len(group))
+        #     scores.extend([abs(score) if is_anomaly else 0] * len(group))
+        # else:
+        #     scores.extend([0] * len(group))
+            scores.append(abs(score) if is_anomaly else 0)
         else:
-            scores.extend([0] * len(group))
+            scores.append(0)
 
-    abnormal_trace_df["score"] = scores
+    unique_pairs = (
+        abnormal_trace_df.groupby(["service_name", "parent_service"])
+        .first()
+        .reset_index()
+    )
+    unique_pairs["score"] = scores
 
     # 提取需要的列并转换为列表格式
-    trace_records = abnormal_trace_df[
+    trace_records = unique_pairs[
         ["timestamp", "parent_service", "service_name", "score"]
     ].values.tolist()
 

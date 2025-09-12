@@ -237,7 +237,7 @@ def single_test(
 
 @app.command()
 def batch_test(label: str | None = None):
-    run_batch(algorithm=diagfusion, algorithm_id=75, datasets=[21], label=label)
+    run_batch(algorithm=diagfusion, algorithm_id=75, datasets=[56], label=label)
 
 
 if __name__ == "__main__":
