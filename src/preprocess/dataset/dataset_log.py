@@ -125,7 +125,7 @@ class DrainProcessor:
 
 
 def process_datapack(data_pack: Path) -> list:
-    drain = DrainProcessor(conf="/home/nn/workspace/DiagFusion/drain.ini", save_path="cache/drain/temp")
+    drain = DrainProcessor(conf="drain.ini", save_path="cache/drain/temp")
         
     # 获取相关文件路径
     fs = derive_filename(data_pack)
@@ -281,7 +281,7 @@ def preprocess_logs_inference(
         处理后的DataFrame列表
     """
     # 初始化处理器
-    drain = DrainProcessor(conf="/home/nn/workspace/DiagFusion/drain.ini", save_path="cache/drain/temp")
+    drain = DrainProcessor(conf="drain.ini", save_path="cache/drain/temp")
 
     # 存储每个data_pack的日志序列
     log_sequences = []

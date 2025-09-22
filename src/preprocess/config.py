@@ -29,7 +29,7 @@ def update_config_nodes():
     nodes_str = " ".join(instances)
 
     # 读取yaml配置文件
-    config_path = Path("src/config/gaia_config2.yaml")
+    config_path = Path("src/config/rcabench.yaml")
 
     inference_config_path = Path("src/config/inference.yaml")
     inference2_config_path = Path("src/config/inference2.yaml")
