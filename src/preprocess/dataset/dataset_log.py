@@ -317,7 +317,10 @@ def preprocess_logs_inference(
     np.save(str(save_path), np.array(log_sequences, dtype=object))
 
     logger.success(f"已保存日志序列，形状: {len(log_sequences)}")
-    logger.info(f"第一个序列示例: {log_sequences[0][:3]}")
+    if log_sequences:
+        logger.info(f"第一个序列示例: {log_sequences[0][:3]}")
+    else:
+        logger.info("当前数据包没有可用日志序列")
 
     return log_sequences
 
